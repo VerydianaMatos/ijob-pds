@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+
+import '../models/prestador_model.dart';
 import '../services/auth_service.dart';
 import '../services/agendamento_service.dart';
+import '../services/favorito_service.dart';
 
 import 'login_screen.dart';
 import 'agendamento_screen.dart';
@@ -8,7 +11,12 @@ import 'chat_screen.dart';
 import 'avaliacao_screen.dart';
 
 class PerfilPrestadorScreen extends StatefulWidget {
-  const PerfilPrestadorScreen({super.key});
+  final Prestador prestador;
+
+  const PerfilPrestadorScreen({
+    super.key,
+    required this.prestador,
+  });
 
   @override
   State<PerfilPrestadorScreen> createState() => _PerfilPrestadorScreenState();
@@ -17,66 +25,111 @@ class PerfilPrestadorScreen extends StatefulWidget {
 class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
   bool get jaAgendou {
     return AgendamentoService.agendamentos.any(
-          (a) => a.nomePrestador == "Carlos Martins",
+          (a) => a.nomePrestador == widget.prestador.nome,
     );
   }
 
   bool get podeAvaliar {
     return AgendamentoService.agendamentos.any(
-          (a) => a.nomePrestador == "Carlos Martins" && a.concluido,
+          (a) => a.nomePrestador == widget.prestador.nome && a.concluido,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final prestador = widget.prestador;
+    final favorito = FavoritoService.isFavorito(prestador.nome);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
+
       appBar: AppBar(
-        title: const Text("Perfil do profissional"),
         backgroundColor: const Color(0xFF1E6FD9),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          "Perfil do profissional",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                FavoritoService.alternarFavorito({
+                  "nome": prestador.nome,
+                  "profissao": prestador.profissao,
+                  "distancia": prestador.distancia,
+                  "rating": prestador.rating,
+                  "disponivel": prestador.disponivel,
+                });
+              });
+            },
+            icon: Icon(
+              favorito ? Icons.favorite : Icons.favorite_border,
+              color: favorito ? Colors.red : Colors.white,
+            ),
+          ),
+        ],
       ),
+
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
               decoration: const BoxDecoration(
                 color: Color(0xFF1E6FD9),
                 borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(20),
+                  bottom: Radius.circular(24),
                 ),
               ),
-              child: const Column(
+              child: Column(
                 children: [
                   CircleAvatar(
-                    radius: 40,
+                    radius: 44,
                     backgroundColor: Colors.white,
-                    child: Text(
-                      "CM",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Color(0xFF1E6FD9),
-                        fontWeight: FontWeight.bold,
+                    child: Container(
+                      width: 84,
+                      height: 84,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFFE3F0FF),
+                      ),
+                      child: Center(
+                        child: Text(
+                          _iniciais(prestador.nome),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            color: Color(0xFF1E6FD9),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
+
+                  const SizedBox(height: 10),
+
                   Text(
-                    "Carlos Martins",
-                    style: TextStyle(
+                    prestador.nome,
+                    style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 4),
+
+                  const SizedBox(height: 4),
+
                   Text(
-                    "Eletricista",
-                    style: TextStyle(color: Colors.white70),
+                    prestador.profissao,
+                    style: const TextStyle(color: Colors.white70),
                   ),
-                  SizedBox(height: 4),
-                  Row(
+
+                  const SizedBox(height: 8),
+
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.location_on, color: Colors.white70, size: 16),
@@ -87,18 +140,43 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 6),
+
+                  const SizedBox(height: 8),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.star, color: Colors.orange, size: 16),
-                      Icon(Icons.star, color: Colors.orange, size: 16),
-                      Icon(Icons.star, color: Colors.orange, size: 16),
-                      Icon(Icons.star, color: Colors.orange, size: 16),
-                      Icon(Icons.star, color: Colors.orange, size: 16),
-                      SizedBox(width: 6),
-                      Text("4.9", style: TextStyle(color: Colors.white)),
+                      const Icon(Icons.star, color: Colors.orange, size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        prestador.rating.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: prestador.disponivel ? Colors.green : Colors.orange,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      prestador.disponivel ? "Disponível" : "Ocupado",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -109,54 +187,84 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _infoCard(
+                          Icons.attach_money,
+                          prestador.preco,
+                          "Preço médio",
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _infoCard(
+                          Icons.flash_on,
+                          prestador.resposta,
+                          "Resposta",
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _infoCard(
+                          Icons.work,
+                          prestador.servicos,
+                          "Serviços",
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
                   const Text(
                     "Serviços oferecidos",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                   ),
+
                   const SizedBox(height: 10),
 
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: const [
-                      Chip(label: Text("Instalações")),
-                      Chip(label: Text("Reparos")),
-                      Chip(label: Text("Quadro elétrico")),
-                      Chip(label: Text("Tomadas")),
-                      Chip(label: Text("Iluminação")),
-                    ],
+                    children: _chipsPorCategoria(prestador.categoria),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
                   const Text(
                     "Sobre",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 6),
-
-                  const Text(
-                    "Eletricista com 8 anos de experiência, atendendo residências e comércios. Orçamento sem compromisso.",
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
+
+                  Text(
+                    prestador.descricao,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      height: 1.5,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
 
                   const Text(
                     "Localização",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                   ),
-                  const SizedBox(height: 10),
+
+                  const SizedBox(height: 12),
 
                   Stack(
                     alignment: Alignment.center,
                     children: [
                       Container(
-                        height: 150,
+                        height: 160,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
                           color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(
                           Icons.map,
@@ -172,7 +280,7 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
 
                   const Row(
                     children: [
@@ -185,26 +293,30 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
                   const Text(
                     "Avaliações recentes",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                   ),
+
                   const SizedBox(height: 10),
 
-                  _avaliacao("Serviço rápido e muito bem feito!"),
-                  _avaliacao("Pontual e organizado, recomendo!"),
+                  _avaliacao("Muito rápido e eficiente!"),
+                  _avaliacao("Excelente profissional, recomendo!"),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
+                    child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1E6FD9),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                       onPressed: () async {
                         if (!AuthService.isLogged) {
@@ -227,7 +339,8 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
 
                         setState(() {});
                       },
-                      child: const Text("Agendar serviço"),
+                      icon: const Icon(Icons.calendar_month),
+                      label: const Text("Agendar serviço"),
                     ),
                   ),
 
@@ -279,13 +392,75 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
     );
   }
 
-  static Widget _avaliacao(String texto) {
+  Widget _infoCard(IconData icon, String valor, String label) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFF1E6FD9)),
+          const SizedBox(height: 8),
+          Text(valor, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _chipsPorCategoria(String categoria) {
+    final Map<String, List<String>> dados = {
+      "Elétrica": [
+        "Instalações",
+        "Reparos",
+        "Quadro elétrico",
+        "Tomadas",
+        "Iluminação",
+      ],
+      "Limpeza": [
+        "Limpeza residencial",
+        "Limpeza pesada",
+        "Organização",
+        "Faxina completa",
+      ],
+      "Hidráulica": [
+        "Vazamentos",
+        "Encanamento",
+        "Torneiras",
+        "Manutenção",
+      ],
+      "Pintura": [
+        "Pintura interna",
+        "Pintura externa",
+        "Acabamento",
+        "Textura",
+      ],
+      "Frete": [
+        "Mudanças",
+        "Entregas",
+        "Transporte",
+        "Carretos",
+      ],
+    };
+
+    final lista = dados[categoria] ?? ["Serviço geral"];
+
+    return lista.map((item) => Chip(label: Text(item))).toList();
+  }
+
+  Widget _avaliacao(String texto) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
@@ -295,5 +470,15 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
         ],
       ),
     );
+  }
+
+  String _iniciais(String nome) {
+    final partes = nome.trim().split(" ");
+
+    if (partes.length == 1) {
+      return partes.first[0].toUpperCase();
+    }
+
+    return "${partes[0][0]}${partes[1][0]}".toUpperCase();
   }
 }

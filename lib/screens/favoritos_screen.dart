@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../services/favorito_service.dart';
+import '../services/prestador_service.dart';
 import '../widgets/prestador_card.dart';
+import '../models/prestador_model.dart';
+
 import 'perfil_prestador_screen.dart';
 
 class FavoritosScreen extends StatefulWidget {
@@ -11,6 +15,16 @@ class FavoritosScreen extends StatefulWidget {
 }
 
 class _FavoritosScreenState extends State<FavoritosScreen> {
+  Prestador? _buscarPrestador(String nome) {
+    try {
+      return PrestadorService.prestadores.firstWhere(
+            (p) => p.nome == nome,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final favoritos = FavoritoService.favoritos;
@@ -22,8 +36,11 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
         backgroundColor: const Color(0xFF1E6FD9),
       ),
       body: favoritos.isEmpty
-          ? const Center(child: Text("Nenhum favorito ainda"))
+          ? const Center(
+        child: Text("Nenhum favorito ainda"),
+      )
           : ListView.builder(
+        padding: const EdgeInsets.only(top: 12, bottom: 20),
         itemCount: favoritos.length,
         itemBuilder: (context, index) {
           final p = favoritos[index];
@@ -41,10 +58,16 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
               });
             },
             onTap: () {
+              final prestador = _buscarPrestador(p["nome"]);
+
+              if (prestador == null) return;
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const PerfilPrestadorScreen(),
+                  builder: (_) => PerfilPrestadorScreen(
+                    prestador: prestador,
+                  ),
                 ),
               );
             },

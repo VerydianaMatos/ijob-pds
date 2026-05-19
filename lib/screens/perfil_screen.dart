@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+
 import 'login_screen.dart';
 import 'cadastro_screen.dart';
 import 'cadastro_prestador_screen.dart';
 import 'meus_servicos_screen.dart';
 import 'painel_prestador_screen.dart';
 import 'favoritos_screen.dart';
+import 'configuracoes_screen.dart';
 
 class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
@@ -38,7 +40,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
           const Icon(
             Icons.person_outline,
-            size: 85,
+            size: 90,
             color: Color(0xFF1E6FD9),
           ),
 
@@ -46,13 +48,16 @@ class _PerfilScreenState extends State<PerfilScreen> {
 
           const Text(
             "Você ainda não está logado",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
 
           const SizedBox(height: 6),
 
           const Text(
-            "Entre ou crie uma conta para acessar seus serviços.",
+            "Entre ou crie uma conta para acessar seus serviços, favoritos e agendamentos.",
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey),
           ),
@@ -120,11 +125,11 @@ class _PerfilScreenState extends State<PerfilScreen> {
       child: Column(
         children: [
           CircleAvatar(
-            radius: 42,
+            radius: 45,
             backgroundColor: const Color(0xFFE3F0FF),
             child: Icon(
               AuthService.isPrestador ? Icons.work : Icons.person,
-              size: 40,
+              size: 42,
               color: const Color(0xFF1E6FD9),
             ),
           ),
@@ -132,15 +137,34 @@ class _PerfilScreenState extends State<PerfilScreen> {
           const SizedBox(height: 10),
 
           Text(
-            AuthService.nome,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            AuthService.nome.isEmpty ? "Usuário" : AuthService.nome,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
 
           const SizedBox(height: 4),
 
           Text(
-            AuthService.email,
+            AuthService.email.isEmpty
+                ? "email@exemplo.com"
+                : AuthService.email,
             style: const TextStyle(color: Colors.grey),
+          ),
+
+          const SizedBox(height: 8),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.location_on, size: 16, color: Colors.grey),
+              const SizedBox(width: 4),
+              Text(
+                AuthService.localizacao,
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
           ),
 
           const SizedBox(height: 30),
@@ -151,9 +175,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const FavoritosScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const FavoritosScreen()),
               );
             },
           ),
@@ -189,7 +211,14 @@ class _PerfilScreenState extends State<PerfilScreen> {
           _opcao(
             icon: Icons.settings,
             title: "Configurações",
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ConfiguracoesScreen(),
+                ),
+              ).then((_) => setState(() {}));
+            },
           ),
 
           _opcao(
@@ -211,10 +240,10 @@ class _PerfilScreenState extends State<PerfilScreen> {
     required VoidCallback onTap,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: ListTile(
         leading: Icon(icon, color: const Color(0xFF1E6FD9)),

@@ -12,7 +12,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int index = 0;
 
-  final pages = const [
+  final List<Widget> pages = const [
     PrestadorScreen(),
     PerfilScreen(),
   ];
@@ -21,7 +21,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      body: pages[index],
+
+      body: IndexedStack(
+        index: index,
+        children: pages,
+      ),
+
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: index,
         selectedItemColor: const Color(0xFF1E6FD9),

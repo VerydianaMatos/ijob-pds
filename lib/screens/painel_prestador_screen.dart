@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
+import 'solicitacoes_prestador_screen.dart';
 import '../services/auth_service.dart';
 
 class PainelPrestadorScreen extends StatelessWidget {
@@ -9,8 +10,6 @@ class PainelPrestadorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-
-      // 🔵 APPBAR COM VOLTAR FUNCIONANDO
       appBar: AppBar(
         title: const Text("Painel do Prestador"),
         backgroundColor: const Color(0xFF1E6FD9),
@@ -25,47 +24,44 @@ class PainelPrestadorScreen extends StatelessWidget {
           },
         ),
       ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      body: SingleChildScrollView(
         child: Column(
           children: [
-
-            // 👤 PERFIL
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
+              padding: const EdgeInsets.all(22),
+              decoration: const BoxDecoration(
+                color: Color(0xFF1E6FD9),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(24),
+                ),
               ),
               child: Column(
                 children: [
                   const CircleAvatar(
                     radius: 40,
-                    backgroundColor: Color(0xFFE3F0FF),
+                    backgroundColor: Colors.white,
                     child: Icon(
                       Icons.work,
-                      size: 40,
+                      size: 38,
                       color: Color(0xFF1E6FD9),
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   Text(
-                    AuthService.nome,
+                    AuthService.nome.isEmpty
+                        ? "Prestador"
+                        : AuthService.nome,
                     style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
                     ),
                   ),
-
                   const SizedBox(height: 4),
-
                   const Text(
-                    "Prestador de serviços",
-                    style: TextStyle(color: Colors.grey),
+                    "Profissional cadastrado no IJob",
+                    style: TextStyle(color: Colors.white70),
                   ),
                 ],
               ),
@@ -73,80 +69,180 @@ class PainelPrestadorScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // 📊 OPÇÕES
-            _cardOpcao(
-              icon: Icons.assignment,
-              title: "Serviços recebidos",
-              subtitle: "Visualizar pedidos dos clientes",
-              onTap: () {},
-            ),
-
-            _cardOpcao(
-              icon: Icons.star,
-              title: "Minhas avaliações",
-              subtitle: "Veja o que os clientes dizem",
-              onTap: () {},
-            ),
-
-            _cardOpcao(
-              icon: Icons.settings,
-              title: "Configurações",
-              subtitle: "Ajustar perfil e preferências",
-              onTap: () {},
-            ),
-
-            const Spacer(),
-
-            // 🚪 SAIR
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                onPressed: () {
-                  AuthService.logout();
-
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const HomeScreen(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: const [
+                  Expanded(
+                    child: _ResumoCard(
+                      titulo: "Solicitações",
+                      valor: "2",
+                      icon: Icons.assignment,
                     ),
-                        (route) => false,
-                  );
-                },
-                icon: const Icon(Icons.logout),
-                label: const Text("Sair"),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: _ResumoCard(
+                      titulo: "Avaliação",
+                      valor: "4.9",
+                      icon: Icons.star,
+                    ),
+                  ),
+                ],
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            _OpcaoPainel(
+              icon: Icons.assignment,
+              titulo: "Solicitações recebidas",
+              subtitulo: "Aceite ou recuse pedidos de clientes",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const SolicitacoesPrestadorScreen(),
+                  ),
+                );
+              },
+            ),
+
+            _OpcaoPainel(
+              icon: Icons.handyman,
+              titulo: "Meus serviços",
+              subtitulo: "Gerencie os serviços que você oferece",
+              onTap: () {},
+            ),
+
+            _OpcaoPainel(
+              icon: Icons.chat,
+              titulo: "Mensagens",
+              subtitulo: "Converse com seus clientes",
+              onTap: () {},
+            ),
+
+            _OpcaoPainel(
+              icon: Icons.edit,
+              titulo: "Editar perfil profissional",
+              subtitulo: "Atualize seus dados e descrição",
+              onTap: () {},
+            ),
+
+            const SizedBox(height: 20),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: () {
+                    AuthService.logout();
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
+                          (route) => false,
+                    );
+                  },
+                  icon: const Icon(Icons.logout),
+                  label: const Text("Sair"),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
+}
 
-  // 🔹 CARD PADRÃO
-  Widget _cardOpcao({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
+class _ResumoCard extends StatelessWidget {
+  final String titulo;
+  final String valor;
+  final IconData icon;
+
+  const _ResumoCard({
+    required this.titulo,
+    required this.valor,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFF1E6FD9)),
+          const SizedBox(height: 8),
+          Text(
+            valor,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          Text(titulo, style: const TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
+  }
+}
+
+class _OpcaoPainel extends StatelessWidget {
+  final IconData icon;
+  final String titulo;
+  final String subtitulo;
+  final VoidCallback onTap;
+
+  const _OpcaoPainel({
+    required this.icon,
+    required this.titulo,
+    required this.subtitulo,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.035),
+            blurRadius: 9,
+          )
+        ],
       ),
       child: ListTile(
-        leading: Icon(icon, color: const Color(0xFF1E6FD9)),
-        title: Text(title),
-        subtitle: Text(subtitle),
+        leading: CircleAvatar(
+          backgroundColor: const Color(0xFFE3F0FF),
+          child: Icon(icon, color: const Color(0xFF1E6FD9)),
+        ),
+        title: Text(
+          titulo,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(subtitulo),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap,
       ),
