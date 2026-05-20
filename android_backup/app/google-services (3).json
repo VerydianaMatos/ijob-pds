@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "149515405359",
+    "project_id": "ijob-pds",
+    "storage_bucket": "ijob-pds.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:149515405359:android:c7f80dfa20b1264a4ededa",
+        "android_client_info": {
+          "package_name": "com.example.ijob_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIumhxSd8S9t3tzHamXoZNdcPfwQwKpdw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
