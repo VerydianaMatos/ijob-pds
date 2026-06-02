@@ -28,20 +28,23 @@ class PrestadorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
+            if (!isDark)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
           ],
         ),
         child: Row(
@@ -51,9 +54,8 @@ class PrestadorCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 32,
                   backgroundColor: const Color(0xFFE3F0FF),
-                  backgroundImage: fotoUrl.isNotEmpty
-                      ? FileImage(File(fotoUrl))
-                      : null,
+                  backgroundImage:
+                  fotoUrl.isNotEmpty ? FileImage(File(fotoUrl)) : null,
                   child: fotoUrl.isEmpty
                       ? Text(
                     _iniciais(nome),
@@ -106,11 +108,7 @@ class PrestadorCard extends StatelessWidget {
 
                   Row(
                     children: [
-                      const Icon(
-                        Icons.location_on,
-                        size: 15,
-                        color: Colors.grey,
-                      ),
+                      const Icon(Icons.location_on, size: 15, color: Colors.grey),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -128,11 +126,7 @@ class PrestadorCard extends StatelessWidget {
 
                   Row(
                     children: [
-                      const Icon(
-                        Icons.star,
-                        color: Colors.orange,
-                        size: 17,
-                      ),
+                      const Icon(Icons.star, color: Colors.orange, size: 17),
                       const SizedBox(width: 4),
                       Text(
                         rating.toString(),
@@ -182,11 +176,7 @@ class PrestadorCard extends StatelessWidget {
 
   String _iniciais(String nome) {
     final partes = nome.trim().split(" ");
-
-    if (partes.length == 1) {
-      return partes[0][0].toUpperCase();
-    }
-
+    if (partes.length == 1) return partes[0][0].toUpperCase();
     return "${partes[0][0]}${partes[1][0]}".toUpperCase();
   }
 }

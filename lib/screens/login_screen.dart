@@ -12,8 +12,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController senhaController = TextEditingController();
+  final emailController = TextEditingController();
+  final senhaController = TextEditingController();
 
   bool carregando = false;
 
@@ -38,9 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    setState(() {
-      carregando = true;
-    });
+    setState(() => carregando = true);
 
     final erro = await AuthService.loginCliente(
       emailUser: email,
@@ -49,16 +47,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!mounted) return;
 
-    setState(() {
-      carregando = false;
-    });
+    setState(() => carregando = false);
 
     if (erro != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(erro),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(erro), backgroundColor: Colors.red),
       );
       return;
     }
@@ -71,15 +64,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
+        backgroundColor: isDark ? const Color(0xFF0B1220) : Colors.white,
         foregroundColor: const Color(0xFF1E6FD9),
+        elevation: 0,
       ),
-
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -93,10 +86,15 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 30),
 
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E6FD9),
-                  borderRadius: BorderRadius.circular(20),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF1E6FD9),
+                      Color(0xFF3D8BFF),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 child: Column(
                   children: [
@@ -105,22 +103,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                        fontSize: 20,
                       ),
                     ),
 
                     const SizedBox(height: 20),
 
                     _campo("Email", Icons.email, emailController),
-
                     const SizedBox(height: 12),
-
-                    _campo(
-                      "Senha",
-                      Icons.lock,
-                      senhaController,
-                      senha: true,
-                    ),
+                    _campo("Senha", Icons.lock, senhaController, senha: true),
 
                     const SizedBox(height: 18),
 
@@ -130,10 +121,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: const Color(0xFF1E6FD9),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
                         ),
                         onPressed: carregando ? null : entrar,
                         child: carregando
@@ -184,13 +171,14 @@ class _LoginScreenState extends State<LoginScreen> {
     return TextField(
       controller: controller,
       obscureText: senha,
+      style: const TextStyle(color: Colors.black),
       decoration: InputDecoration(
         hintText: label,
         prefixIcon: Icon(icon, color: Colors.grey),
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
       ),

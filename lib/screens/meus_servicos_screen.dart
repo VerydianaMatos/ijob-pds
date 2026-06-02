@@ -53,15 +53,10 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
     final lista = filtrados;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("Meus serviços"),
-        backgroundColor: const Color(0xFF1E6FD9),
-        foregroundColor: Colors.white,
-        elevation: 0,
       ),
-
       body: RefreshIndicator(
         onRefresh: carregarAgendamentos,
         child: CustomScrollView(
@@ -198,7 +193,9 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.16),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.16)),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.16),
+        ),
       ),
       child: Column(
         children: [
@@ -239,22 +236,16 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: selecionada ? const Color(0xFF1E6FD9) : Colors.white,
+            color: selecionada
+                ? const Color(0xFF1E6FD9)
+                : Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              if (selecionada)
-                BoxShadow(
-                  color: const Color(0xFF1E6FD9).withOpacity(0.18),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-            ],
           ),
           alignment: Alignment.center,
           child: Text(
             titulo,
             style: TextStyle(
-              color: selecionada ? Colors.white : Colors.black87,
+              color: selecionada ? Colors.white : null,
               fontWeight: FontWeight.bold,
               fontSize: 13,
             ),
@@ -265,18 +256,21 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
   }
 
   Widget _cardServico(Agendamento item) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.045),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.045),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
         ],
       ),
       child: Column(
@@ -334,7 +328,9 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F7FA),
+              color: isDark
+                  ? const Color(0xFF0F172A)
+                  : const Color(0xFFF5F7FA),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -349,7 +345,6 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
                   child: Text(
                     item.data,
                     style: const TextStyle(
-                      color: Colors.black87,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

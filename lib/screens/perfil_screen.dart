@@ -20,6 +20,29 @@ class PerfilScreen extends StatefulWidget {
 }
 
 class _PerfilScreenState extends State<PerfilScreen> {
+  bool carregando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    carregarDadosPerfil();
+  }
+
+  Future<void> carregarDadosPerfil() async {
+    setState(() {
+      carregando = true;
+    });
+
+    await FavoritoService.carregarFavoritos();
+    await AgendamentoService.carregarAgendamentos();
+
+    if (!mounted) return;
+
+    setState(() {
+      carregando = false;
+    });
+  }
+
   String get nomeUsuario {
     if (AuthService.nome.isNotEmpty) return AuthService.nome;
 
@@ -59,126 +82,116 @@ class _PerfilScreenState extends State<PerfilScreen> {
   Widget build(BuildContext context) {
     final logado = AuthService.isLogged;
 
+    if (carregando) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF1E6FD9),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
-        child: logado ? _perfilLogado(context) : _perfilDeslogado(context),
+        child: RefreshIndicator(
+          onRefresh: carregarDadosPerfil,
+          child: logado ? _perfilLogado(context) : _perfilDeslogado(context),
+        ),
       ),
     );
   }
 
   Widget _perfilDeslogado(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _topoDeslogado(),
-
-          const SizedBox(height: 20),
-
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
+    return ListView(
+      children: [
+        _topoDeslogado(),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: _card(
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.lock_outline,
+                  size: 70,
+                  color: Color(0xFF1E6FD9),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Você ainda não está logado",
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.lock_outline,
-                    size: 70,
-                    color: Color(0xFF1E6FD9),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Entre ou crie uma conta para acessar seus serviços, favoritos e agendamentos.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey,
+                    height: 1.4,
                   ),
-
-                  const SizedBox(height: 16),
-
-                  const Text(
-                    "Você ainda não está logado",
-                    style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LoginScreen(),
+                        ),
+                      );
+                      carregarDadosPerfil();
+                    },
+                    icon: const Icon(Icons.login),
+                    label: const Text("Entrar"),
                   ),
-
-                  const SizedBox(height: 8),
-
-                  const Text(
-                    "Entre ou crie uma conta para acessar seus serviços, favoritos e agendamentos.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.grey,
-                      height: 1.4,
-                    ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CadastroScreen(),
+                        ),
+                      );
+                      carregarDadosPerfil();
+                    },
+                    icon: const Icon(Icons.person_add),
+                    label: const Text("Criar conta"),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const LoginScreen(),
-                          ),
-                        ).then((_) => setState(() {}));
-                      },
-                      icon: const Icon(Icons.login),
-                      label: const Text("Entrar"),
-                    ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CadastroPrestadorScreen(),
+                        ),
+                      );
+                      carregarDadosPerfil();
+                    },
+                    icon: const Icon(Icons.work),
+                    label: const Text("Seja um prestador"),
                   ),
-
-                  const SizedBox(height: 10),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const CadastroScreen(),
-                          ),
-                        ).then((_) => setState(() {}));
-                      },
-                      icon: const Icon(Icons.person_add),
-                      label: const Text("Criar conta"),
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const CadastroPrestadorScreen(),
-                          ),
-                        ).then((_) => setState(() {}));
-                      },
-                      icon: const Icon(Icons.work),
-                      label: const Text("Seja um prestador"),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -188,129 +201,120 @@ class _PerfilScreenState extends State<PerfilScreen> {
     final totalConcluidos =
         AgendamentoService.agendamentos.where((a) => a.concluido).length;
 
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _topoLogado(),
-
-          const SizedBox(height: 18),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _resumoCard(
-                    icon: Icons.favorite,
-                    valor: totalFavoritos.toString(),
-                    label: "Favoritos",
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _resumoCard(
-                    icon: Icons.calendar_month,
-                    valor: totalAgendamentos.toString(),
-                    label: "Serviços",
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _resumoCard(
-                    icon: Icons.check_circle,
-                    valor: totalConcluidos.toString(),
-                    label: "Concluídos",
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                _opcao(
+    return ListView(
+      children: [
+        _topoLogado(),
+        const SizedBox(height: 18),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Expanded(
+                child: _resumoCard(
                   icon: Icons.favorite,
-                  title: "Favoritos",
-                  subtitle: "Veja seus profissionais salvos",
+                  valor: totalFavoritos.toString(),
+                  label: "Favoritos",
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _resumoCard(
+                  icon: Icons.calendar_month,
+                  valor: totalAgendamentos.toString(),
+                  label: "Serviços",
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _resumoCard(
+                  icon: Icons.check_circle,
+                  valor: totalConcluidos.toString(),
+                  label: "Concluídos",
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              _opcao(
+                icon: Icons.favorite,
+                title: "Favoritos",
+                subtitle: "Veja seus profissionais salvos",
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const FavoritosScreen(),
+                    ),
+                  );
+                  carregarDadosPerfil();
+                },
+              ),
+              if (AuthService.isPrestador)
+                _opcao(
+                  icon: Icons.dashboard,
+                  title: "Painel do prestador",
+                  subtitle: "Gerencie seus serviços e atendimentos",
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const FavoritosScreen(),
+                        builder: (_) => const PainelPrestadorScreen(),
                       ),
                     );
                   },
                 ),
-
-                if (AuthService.isPrestador)
-                  _opcao(
-                    icon: Icons.dashboard,
-                    title: "Painel do prestador",
-                    subtitle: "Gerencie seus serviços e atendimentos",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const PainelPrestadorScreen(),
-                        ),
-                      );
-                    },
-                  ),
-
-                if (!AuthService.isPrestador)
-                  _opcao(
-                    icon: Icons.work,
-                    title: "Meus serviços",
-                    subtitle: "Acompanhe seus agendamentos",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const MeusServicosScreen(),
-                        ),
-                      );
-                    },
-                  ),
-
+              if (!AuthService.isPrestador)
                 _opcao(
-                  icon: Icons.settings,
-                  title: "Configurações",
-                  subtitle: "Preferências da sua conta",
-                  onTap: () {
-                    Navigator.push(
+                  icon: Icons.work,
+                  title: "Meus serviços",
+                  subtitle: "Acompanhe seus agendamentos",
+                  onTap: () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const ConfiguracoesScreen(),
+                        builder: (_) => const MeusServicosScreen(),
                       ),
-                    ).then((_) => setState(() {}));
+                    );
+                    carregarDadosPerfil();
                   },
                 ),
-
-                const SizedBox(height: 10),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
+              _opcao(
+                icon: Icons.settings,
+                title: "Configurações",
+                subtitle: "Preferências da sua conta",
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ConfiguracoesScreen(),
                     ),
-                    onPressed: sair,
-                    icon: const Icon(Icons.logout),
-                    label: const Text("Sair da conta"),
+                  );
+                  carregarDadosPerfil();
+                },
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
                   ),
+                  onPressed: sair,
+                  icon: const Icon(Icons.logout),
+                  label: const Text("Sair da conta"),
                 ),
-
-                const SizedBox(height: 30),
-              ],
-            ),
+              ),
+              const SizedBox(height: 30),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -385,9 +389,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
               color: const Color(0xFF1E6FD9),
             ),
           ),
-
           const SizedBox(height: 14),
-
           Text(
             nomeUsuario,
             style: const TextStyle(
@@ -396,16 +398,12 @@ class _PerfilScreenState extends State<PerfilScreen> {
               fontSize: 23,
             ),
           ),
-
           const SizedBox(height: 4),
-
           Text(
             emailUsuario,
             style: const TextStyle(color: Colors.white70),
           ),
-
           const SizedBox(height: 10),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -421,15 +419,15 @@ class _PerfilScreenState extends State<PerfilScreen> {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.2),
+              ),
             ),
             child: Text(
               AuthService.isPrestador ? "Conta prestador" : "Conta cliente",
@@ -450,19 +448,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
     required String valor,
     required String label,
   }) {
-    return Container(
+    return _card(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.035),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
       child: Column(
         children: [
           Icon(
@@ -499,49 +486,68 @@ class _PerfilScreenState extends State<PerfilScreen> {
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.035),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
+      child: _card(
+        padding: EdgeInsets.zero,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 6,
           ),
+          leading: Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEAF2FF),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              icon,
+              color: const Color(0xFF1E6FD9),
+            ),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          subtitle: Text(
+            subtitle,
+            style: const TextStyle(fontSize: 12),
+          ),
+          trailing: const Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: Colors.grey,
+          ),
+          onTap: onTap,
+        ),
+      ),
+    );
+  }
+
+  Widget _card({
+    required Widget child,
+    EdgeInsetsGeometry padding = const EdgeInsets.all(24),
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      width: double.infinity,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 6,
-        ),
-        leading: Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: const Color(0xFFEAF2FF),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(
-            icon,
-            color: const Color(0xFF1E6FD9),
-          ),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(fontSize: 12),
-        ),
-        trailing: const Icon(
-          Icons.arrow_forward_ios,
-          size: 16,
-          color: Colors.grey,
-        ),
-        onTap: onTap,
-      ),
+      child: child,
     );
   }
 }

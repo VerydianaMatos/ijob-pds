@@ -97,12 +97,17 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
 
     return prestadores.where((p) {
       final combinaCategoria =
-          categoriaSelecionada == "Todos" || p.categoria == categoriaSelecionada;
+          categoriaSelecionada == "Todos" ||
+              p.categorias.contains(categoriaSelecionada);
 
-      final combinaBusca = textoBusca.isEmpty ||
-          p.nome.toLowerCase().contains(textoBusca) ||
-          p.profissao.toLowerCase().contains(textoBusca) ||
-          p.categoria.toLowerCase().contains(textoBusca);
+      final combinaBusca =
+          textoBusca.isEmpty ||
+              p.nome.toLowerCase().contains(textoBusca) ||
+              p.profissao.toLowerCase().contains(textoBusca) ||
+              p.categoria.toLowerCase().contains(textoBusca) ||
+              p.categorias.any(
+                    (cat) => cat.toLowerCase().contains(textoBusca),
+              );
 
       return combinaCategoria && combinaBusca;
     }).toList();
@@ -120,7 +125,7 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
     final listaFiltrada = prestadoresFiltrados;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: carregarDados,
@@ -159,7 +164,8 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
                     ),
                   ),
 
-                if (!carregando && listaFiltrada.isEmpty) _nenhumEncontrado(),
+                if (!carregando && listaFiltrada.isEmpty)
+                  _nenhumEncontrado(),
 
                 if (!carregando)
                   ...listaFiltrada.map(
@@ -175,11 +181,19 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
                         await FavoritoService.alternarFavorito({
                           "nome": p.nome,
                           "profissao": p.profissao,
+                          "categoria": p.categoria,
+                          "categorias": p.categorias,
                           "distancia": p.distancia,
                           "rating": p.rating,
                           "disponivel": p.disponivel,
+                          "descricao": p.descricao,
+                          "preco": p.preco,
+                          "resposta": p.resposta,
+                          "servicos": p.servicos,
                           "fotoUrl": p.fotoUrl,
                         });
+
+                        if (!mounted) return;
 
                         setState(() {});
                       },
@@ -335,7 +349,9 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(13),
         decoration: BoxDecoration(
-          color: const Color(0xFFE3F0FF),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF1E293B)
+              : const Color(0xFFE3F0FF),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -364,7 +380,7 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
                 vertical: 5,
               ),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text(
@@ -430,7 +446,9 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
         margin: const EdgeInsets.only(right: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: selecionada ? const Color(0xFF1E6FD9) : Colors.white,
+          color: selecionada
+              ? const Color(0xFF1E6FD9)
+              : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             if (selecionada)
@@ -445,7 +463,9 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
         child: Text(
           nome,
           style: TextStyle(
-            color: selecionada ? Colors.white : Colors.black87,
+            color: selecionada
+                ? Colors.white
+                : Theme.of(context).textTheme.bodyMedium?.color,
             fontWeight: FontWeight.bold,
             fontSize: 13,
           ),
@@ -479,7 +499,8 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
             ),
           ),
 
-          if (buscaController.text.isNotEmpty || categoriaSelecionada != "Todos")
+          if (buscaController.text.isNotEmpty ||
+              categoriaSelecionada != "Todos")
             TextButton(
               onPressed: limparBusca,
               child: const Text("Limpar"),
@@ -496,7 +517,7 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(22),
         ),
         child: const Column(
@@ -530,7 +551,7 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(22),
         ),
         child: Column(

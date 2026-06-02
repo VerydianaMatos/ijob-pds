@@ -11,10 +11,10 @@ class CadastroScreen extends StatefulWidget {
 }
 
 class _CadastroScreenState extends State<CadastroScreen> {
-  final TextEditingController nomeController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController telefoneController = TextEditingController();
-  final TextEditingController senhaController = TextEditingController();
+  final nomeController = TextEditingController();
+  final emailController = TextEditingController();
+  final telefoneController = TextEditingController();
+  final senhaController = TextEditingController();
 
   bool carregando = false;
 
@@ -47,15 +47,13 @@ class _CadastroScreenState extends State<CadastroScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("A senha precisa ter pelo menos 6 caracteres."),
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.orange,
         ),
       );
       return;
     }
 
-    setState(() {
-      carregando = true;
-    });
+    setState(() => carregando = true);
 
     final erro = await AuthService.cadastrarCliente(
       nomeUser: nome,
@@ -65,26 +63,14 @@ class _CadastroScreenState extends State<CadastroScreen> {
 
     if (!mounted) return;
 
-    setState(() {
-      carregando = false;
-    });
+    setState(() => carregando = false);
 
     if (erro != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(erro),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(erro), backgroundColor: Colors.red),
       );
       return;
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Conta criada com sucesso!"),
-        backgroundColor: Colors.green,
-      ),
-    );
 
     Navigator.pushReplacement(
       context,
@@ -94,78 +80,80 @@ class _CadastroScreenState extends State<CadastroScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-
-      appBar: AppBar(
-        title: const Text("Criar conta"),
-        backgroundColor: const Color(0xFF1E6FD9),
-        foregroundColor: Colors.white,
-      ),
-
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(title: const Text("Criar conta")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const Icon(
-              Icons.person_add,
-              size: 70,
-              color: Color(0xFF1E6FD9),
-            ),
-
-            const SizedBox(height: 12),
-
-            const Text(
-              "Cadastro de cliente",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 25),
-
-            _campo("Nome completo", Icons.person, nomeController),
-
-            const SizedBox(height: 12),
-
-            _campo("Email", Icons.email, emailController),
-
-            const SizedBox(height: 12),
-
-            _campo("Telefone", Icons.phone, telefoneController),
-
-            const SizedBox(height: 12),
-
-            _campo(
-              "Senha",
-              Icons.lock,
-              senhaController,
-              senha: true,
-            ),
-
-            const SizedBox(height: 30),
-
-            SizedBox(
+            Container(
               width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E6FD9),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                onPressed: carregando ? null : cadastrar,
-                child: carregando
-                    ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-                    : const Text("Cadastrar cliente"),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(24),
               ),
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.person_add,
+                    size: 70,
+                    color: Color(0xFF1E6FD9),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  const Text(
+                    "Cadastro de cliente",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  _campo("Nome completo", Icons.person, nomeController),
+                  const SizedBox(height: 12),
+                  _campo("Email", Icons.email, emailController),
+                  const SizedBox(height: 12),
+                  _campo("Telefone", Icons.phone, telefoneController),
+                  const SizedBox(height: 12),
+                  _campo("Senha", Icons.lock, senhaController, senha: true),
+
+                  const SizedBox(height: 28),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: carregando ? null : cadastrar,
+                      icon: carregando
+                          ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                          : const Icon(Icons.check),
+                      label: Text(
+                        carregando ? "Cadastrando..." : "Cadastrar cliente",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            Text(
+              isDark ? "Modo escuro ativo 🌙" : "Modo claro ativo ☀️",
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ],
         ),
@@ -185,11 +173,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
       ),
     );
   }

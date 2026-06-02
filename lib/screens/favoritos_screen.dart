@@ -39,9 +39,7 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
 
   Prestador? _buscarPrestador(String nome) {
     try {
-      return PrestadorService.prestadores.firstWhere(
-            (p) => p.nome == nome,
-      );
+      return PrestadorService.prestadores.firstWhere((p) => p.nome == nome);
     } catch (e) {
       return null;
     }
@@ -52,6 +50,9 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
       nome: p["nome"] ?? "",
       profissao: p["profissao"] ?? "",
       categoria: p["categoria"] ?? "Serviço geral",
+      categorias: p["categorias"] is List
+          ? (p["categorias"] as List).map((e) => e.toString()).toList()
+          : [p["categoria"] ?? "Serviço geral"],
       distancia: p["distancia"] ?? "0.5 km",
       rating: (p["rating"] ?? 0).toDouble(),
       disponivel: p["disponivel"] ?? true,
@@ -68,11 +69,9 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
     final favoritos = FavoritoService.favoritos;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("Favoritos"),
-        backgroundColor: const Color(0xFF1E6FD9),
-        foregroundColor: Colors.white,
       ),
       body: RefreshIndicator(
         onRefresh: carregarFavoritos,

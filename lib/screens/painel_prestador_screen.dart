@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../services/auth_service.dart';
+import '../services/prestador_service.dart';
 import '../services/agendamento_service.dart';
-
-import 'home_screen.dart';
-import 'solicitacoes_prestador_screen.dart';
-import 'chat_screen.dart';
 
 class PainelPrestadorScreen extends StatefulWidget {
   const PainelPrestadorScreen({super.key});
@@ -17,9 +13,18 @@ class PainelPrestadorScreen extends StatefulWidget {
 
 class _PainelPrestadorScreenState
     extends State<PainelPrestadorScreen> {
+  bool disponivel = true;
+
   @override
   Widget build(BuildContext context) {
-    final totalServicos =
+    final isDark =
+        Theme.of(context).brightness ==
+            Brightness.dark;
+
+    final totalPrestadores =
+        PrestadorService.prestadores.length;
+
+    final totalAgendamentos =
         AgendamentoService.agendamentos.length;
 
     final concluidos =
@@ -27,435 +32,380 @@ class _PainelPrestadorScreenState
             .where((a) => a.concluido)
             .length;
 
-    final pendentes =
-        AgendamentoService.agendamentos
-            .where((a) => !a.concluido)
-            .length;
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor:
+      Theme.of(context)
+          .scaffoldBackgroundColor,
 
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
+      appBar: AppBar(
+        title:
+        const Text("Painel do prestador"),
+      ),
 
-              // TOPO
-              Container(
-                width: double.infinity,
+      body: SingleChildScrollView(
+        padding:
+        const EdgeInsets.all(20),
 
-                padding: const EdgeInsets.fromLTRB(
-                  20,
-                  22,
-                  20,
-                  30,
-                ),
+        child: Column(
+          children: [
 
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF1E6FD9),
-                      Color(0xFF3D8BFF),
-                    ],
-                  ),
+            // TOPO
+            Container(
+              width: double.infinity,
 
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(30),
-                  ),
-                ),
+              padding:
+              const EdgeInsets.all(24),
 
-                child: Column(
-                  children: [
-
-                    Row(
-                      children: [
-
-                        IconButton(
-                          onPressed: () {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                const HomeScreen(),
-                              ),
-                                  (route) => false,
-                            );
-                          },
-
-                          icon: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                          ),
-                        ),
-
-                        const Spacer(),
-
-                        Container(
-                          padding:
-                          const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-
-                          decoration: BoxDecoration(
-                            color:
-                            Colors.white.withOpacity(0.16),
-
-                            borderRadius:
-                            BorderRadius.circular(20),
-                          ),
-
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.verified,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-
-                              SizedBox(width: 5),
-
-                              Text(
-                                "Prestador",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight:
-                                  FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    const CircleAvatar(
-                      radius: 46,
-                      backgroundColor: Colors.white,
-
-                      child: Icon(
-                        Icons.work,
-                        size: 42,
-                        color: Color(0xFF1E6FD9),
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    Text(
-                      AuthService.nome.isEmpty
-                          ? "Prestador"
-                          : AuthService.nome,
-
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 23,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    Text(
-                      AuthService.localizacao,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                      ),
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    Row(
-                      children: [
-
-                        Expanded(
-                          child: _resumoCard(
-                            titulo: "Serviços",
-                            valor:
-                            totalServicos.toString(),
-                            icon:
-                            Icons.calendar_month,
-                          ),
-                        ),
-
-                        const SizedBox(width: 10),
-
-                        Expanded(
-                          child: _resumoCard(
-                            titulo: "Pendentes",
-                            valor: pendentes.toString(),
-                            icon:
-                            Icons.pending_actions,
-                          ),
-                        ),
-
-                        const SizedBox(width: 10),
-
-                        Expanded(
-                          child: _resumoCard(
-                            titulo: "Concluídos",
-                            valor:
-                            concluidos.toString(),
-                            icon:
-                            Icons.check_circle,
-                          ),
-                        ),
-                      ],
-                    ),
+              decoration:
+              const BoxDecoration(
+                gradient:
+                LinearGradient(
+                  colors: [
+                    Color(0xFF1E6FD9),
+                    Color(0xFF3D8BFF),
                   ],
+                ),
+
+                borderRadius:
+                BorderRadius.all(
+                  Radius.circular(28),
                 ),
               ),
 
-              const SizedBox(height: 24),
+              child: Column(
+                children: [
 
-              // STATUS
-              Padding(
-                padding:
-                const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
+                  const CircleAvatar(
+                    radius: 42,
+                    backgroundColor:
+                    Colors.white,
 
-                child: Container(
-                  width: double.infinity,
-
-                  padding: const EdgeInsets.all(18),
-
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius:
-                    BorderRadius.circular(24),
+                    child: Icon(
+                      Icons.work,
+                      size: 40,
+                      color: Color(
+                          0xFF1E6FD9),
+                    ),
                   ),
 
-                  child: Row(
+                  const SizedBox(
+                      height: 14),
+
+                  const Text(
+                    "Painel profissional",
+
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight:
+                      FontWeight.bold,
+                      fontSize: 24,
+                    ),
+                  ),
+
+                  const SizedBox(
+                      height: 4),
+
+                  const Text(
+                    "Gerencie seus serviços e atendimentos",
+
+                    textAlign:
+                    TextAlign.center,
+
+                    style: TextStyle(
+                      color:
+                      Colors.white70,
+                    ),
+                  ),
+
+                  const SizedBox(
+                      height: 18),
+
+                  Row(
                     children: [
 
-                      Container(
-                        width: 58,
-                        height: 58,
-
-                        decoration: BoxDecoration(
-                          color:
-                          const Color(0xFFEAF2FF),
-
-                          borderRadius:
-                          BorderRadius.circular(18),
-                        ),
-
-                        child: const Icon(
-                          Icons.trending_up,
-                          color: Color(0xFF1E6FD9),
-                          size: 30,
+                      Expanded(
+                        child:
+                        _resumoCard(
+                          icon:
+                          Icons.people,
+                          valor:
+                          totalPrestadores
+                              .toString(),
+                          titulo:
+                          "Clientes",
                         ),
                       ),
 
-                      const SizedBox(width: 14),
+                      const SizedBox(
+                          width: 10),
 
-                      const Expanded(
+                      Expanded(
+                        child:
+                        _resumoCard(
+                          icon: Icons
+                              .calendar_month,
+                          valor:
+                          totalAgendamentos
+                              .toString(),
+                          titulo:
+                          "Serviços",
+                        ),
+                      ),
+
+                      const SizedBox(
+                          width: 10),
+
+                      Expanded(
+                        child:
+                        _resumoCard(
+                          icon:
+                          Icons
+                              .check_circle,
+                          valor:
+                          concluidos
+                              .toString(),
+                          titulo:
+                          "Finalizados",
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(
+                height: 24),
+
+            // STATUS
+            Container(
+              width: double.infinity,
+
+              padding:
+              const EdgeInsets.all(
+                  18),
+
+              decoration:
+              BoxDecoration(
+                color:
+                Theme.of(context)
+                    .cardColor,
+
+                borderRadius:
+                BorderRadius
+                    .circular(24),
+
+                boxShadow: [
+                  if (!isDark)
+                    BoxShadow(
+                      color: Colors
+                          .black
+                          .withOpacity(
+                          0.04),
+
+                      blurRadius: 14,
+
+                      offset:
+                      const Offset(
+                          0, 6),
+                    ),
+                ],
+              ),
+
+              child: Column(
+                children: [
+
+                  Row(
+                    children: [
+
+                      Container(
+                        width: 52,
+                        height: 52,
+
+                        decoration:
+                        BoxDecoration(
+                          color: disponivel
+                              ? Colors.green
+                              .withOpacity(
+                              0.12)
+                              : Colors
+                              .orange
+                              .withOpacity(
+                              0.12),
+
+                          borderRadius:
+                          BorderRadius.circular(
+                              18),
+                        ),
+
+                        child: Icon(
+                          disponivel
+                              ? Icons
+                              .check_circle
+                              : Icons
+                              .schedule,
+
+                          color: disponivel
+                              ? Colors
+                              .green
+                              : Colors
+                              .orange,
+                        ),
+                      ),
+
+                      const SizedBox(
+                          width: 14),
+
+                      Expanded(
                         child: Column(
                           crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                          CrossAxisAlignment
+                              .start,
 
                           children: [
 
                             Text(
-                              "Seu perfil está ativo",
-                              style: TextStyle(
+                              disponivel
+                                  ? "Disponível"
+                                  : "Indisponível",
+
+                              style:
+                              const TextStyle(
                                 fontWeight:
-                                FontWeight.bold,
-                                fontSize: 16,
+                                FontWeight
+                                    .bold,
+
+                                fontSize:
+                                17,
                               ),
                             ),
 
-                            SizedBox(height: 4),
+                            const SizedBox(
+                                height: 4),
 
                             Text(
-                              "Clientes podem encontrar seus serviços normalmente.",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                height: 1.4,
+                              disponivel
+                                  ? "Você pode receber novos serviços"
+                                  : "Você não está recebendo serviços",
+
+                              style:
+                              const TextStyle(
+                                color:
+                                Colors.grey,
                               ),
                             ),
                           ],
                         ),
                       ),
+
+                      Switch(
+                        value:
+                        disponivel,
+
+                        activeColor:
+                        const Color(
+                            0xFF1E6FD9),
+
+                        onChanged:
+                            (value) {
+                          setState(() {
+                            disponivel =
+                                value;
+                          });
+                        },
+                      ),
                     ],
                   ),
+                ],
+              ),
+            ),
+
+            const SizedBox(
+                height: 22),
+
+            // OPCOES
+            _opcao(
+              icon:
+              Icons.calendar_month,
+              titulo:
+              "Meus atendimentos",
+              subtitulo:
+              "Veja serviços agendados",
+            ),
+
+            _opcao(
+              icon:
+              Icons.attach_money,
+              titulo:
+              "Ganhos",
+              subtitulo:
+              "Acompanhe seus recebimentos",
+            ),
+
+            _opcao(
+              icon: Icons.star,
+              titulo:
+              "Avaliações",
+              subtitulo:
+              "Veja feedbacks dos clientes",
+            ),
+
+            _opcao(
+              icon:
+              Icons.settings,
+              titulo:
+              "Configurações",
+              subtitulo:
+              "Personalize sua conta",
+            ),
+
+            const SizedBox(
+                height: 28),
+
+            // BOTAO
+            SizedBox(
+              width: double.infinity,
+
+              child:
+              ElevatedButton.icon(
+                onPressed: () {},
+
+                icon:
+                const Icon(Icons.edit),
+
+                label: const Text(
+                  "Editar perfil",
                 ),
               ),
+            ),
 
-              const SizedBox(height: 24),
-
-              // OPCOES
-              _opcaoPainel(
-                icon: Icons.assignment,
-                titulo: "Solicitações recebidas",
-                subtitulo:
-                "Aceite ou recuse pedidos de clientes",
-
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                      const SolicitacoesPrestadorScreen(),
-                    ),
-                  );
-                },
-              ),
-
-              _opcaoPainel(
-                icon: Icons.chat,
-                titulo: "Mensagens",
-                subtitulo:
-                "Converse com seus clientes",
-
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                      const ChatScreen(),
-                    ),
-                  );
-                },
-              ),
-
-              _opcaoPainel(
-                icon: Icons.handyman,
-                titulo: "Meus serviços",
-                subtitulo:
-                "Gerencie os serviços que você oferece",
-
-                onTap: () {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        "Área em desenvolvimento 👷",
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              _opcaoPainel(
-                icon: Icons.edit,
-                titulo:
-                "Editar perfil profissional",
-
-                subtitulo:
-                "Atualize descrição, preço e categoria",
-
-                onTap: () {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        "Editor de perfil em breve ✨",
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              _opcaoPainel(
-                icon: Icons.bar_chart,
-                titulo: "Estatísticas",
-                subtitulo:
-                "Veja seu desempenho no app",
-
-                onTap: () {
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        "Dashboard em breve 📊",
-                      ),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 28),
-
-              // BOTAO SAIR
-              Padding(
-                padding:
-                const EdgeInsets.symmetric(
-                  horizontal: 20,
-                ),
-
-                child: SizedBox(
-                  width: double.infinity,
-
-                  child: ElevatedButton.icon(
-                    style:
-                    ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor:
-                      Colors.white,
-
-                      padding:
-                      const EdgeInsets.symmetric(
-                        vertical: 15,
-                      ),
-
-                      shape:
-                      RoundedRectangleBorder(
-                        borderRadius:
-                        BorderRadius.circular(
-                            18),
-                      ),
-                    ),
-
-                    onPressed: () {
-                      AuthService.logout();
-
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                          const HomeScreen(),
-                        ),
-                            (route) => false,
-                      );
-                    },
-
-                    icon: const Icon(Icons.logout),
-
-                    label:
-                    const Text("Sair da conta"),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-            ],
-          ),
+            const SizedBox(
+                height: 30),
+          ],
         ),
       ),
     );
   }
 
   Widget _resumoCard({
-    required String titulo,
-    required String valor,
     required IconData icon,
+    required String valor,
+    required String titulo,
   }) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding:
+      const EdgeInsets.symmetric(
+        vertical: 14,
+        horizontal: 10,
+      ),
 
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.14),
+        color:
+        Colors.white.withOpacity(
+            0.16),
 
-        borderRadius: BorderRadius.circular(20),
-
-        border: Border.all(
-          color: Colors.white.withOpacity(0.12),
-        ),
+        borderRadius:
+        BorderRadius.circular(18),
       ),
 
       child: Column(
@@ -464,7 +414,6 @@ class _PainelPrestadorScreenState
           Icon(
             icon,
             color: Colors.white,
-            size: 24,
           ),
 
           const SizedBox(height: 8),
@@ -474,8 +423,9 @@ class _PainelPrestadorScreenState
 
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              fontWeight:
+              FontWeight.bold,
+              fontSize: 18,
             ),
           ),
 
@@ -483,6 +433,9 @@ class _PainelPrestadorScreenState
 
           Text(
             titulo,
+
+            textAlign:
+            TextAlign.center,
 
             style: const TextStyle(
               color: Colors.white70,
@@ -494,35 +447,43 @@ class _PainelPrestadorScreenState
     );
   }
 
-  Widget _opcaoPainel({
+  Widget _opcao({
     required IconData icon,
     required String titulo,
     required String subtitulo,
-    required VoidCallback onTap,
   }) {
+    final isDark =
+        Theme.of(context).brightness ==
+            Brightness.dark;
+
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 7,
-      ),
+      margin:
+      const EdgeInsets.only(
+          bottom: 12),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color:
+        Theme.of(context)
+            .cardColor,
 
-        borderRadius: BorderRadius.circular(22),
+        borderRadius:
+        BorderRadius.circular(22),
 
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.035),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
-          ),
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black
+                  .withOpacity(0.04),
+
+              blurRadius: 12,
+
+              offset:
+              const Offset(0, 5),
+            ),
         ],
       ),
 
       child: ListTile(
-        onTap: onTap,
-
         contentPadding:
         const EdgeInsets.symmetric(
           horizontal: 16,
@@ -530,18 +491,22 @@ class _PainelPrestadorScreenState
         ),
 
         leading: Container(
-          width: 48,
-          height: 48,
+          width: 44,
+          height: 44,
 
           decoration: BoxDecoration(
-            color: const Color(0xFFEAF2FF),
+            color:
+            const Color(0xFFEAF2FF),
+
             borderRadius:
-            BorderRadius.circular(16),
+            BorderRadius.circular(
+                14),
           ),
 
           child: Icon(
             icon,
-            color: const Color(0xFF1E6FD9),
+            color:
+            const Color(0xFF1E6FD9),
           ),
         ),
 
@@ -549,7 +514,8 @@ class _PainelPrestadorScreenState
           titulo,
 
           style: const TextStyle(
-            fontWeight: FontWeight.bold,
+            fontWeight:
+            FontWeight.bold,
           ),
         ),
 
@@ -558,7 +524,6 @@ class _PainelPrestadorScreenState
 
           style: const TextStyle(
             fontSize: 12,
-            height: 1.4,
           ),
         ),
 

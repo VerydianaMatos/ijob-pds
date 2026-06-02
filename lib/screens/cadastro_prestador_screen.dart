@@ -27,7 +27,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
   final experienciaController = TextEditingController();
   final descricaoController = TextEditingController();
 
-  String categoriaSelecionada = "Elétrica";
+  List<String> categoriasSelecionadas = ["Elétrica"];
 
   bool carregandoLocalizacao = false;
   bool salvando = false;
@@ -70,6 +70,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
   Future<void> escolherFoto() async {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(24),
@@ -86,13 +87,11 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
                   width: 50,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Colors.grey[400],
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 const Text(
                   "Foto do perfil",
                   style: TextStyle(
@@ -100,9 +99,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 Row(
                   children: [
                     Expanded(
@@ -125,9 +122,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
                         },
                       ),
                     ),
-
                     const SizedBox(width: 14),
-
                     Expanded(
                       child: _botaoFoto(
                         icon: Icons.photo_library,
@@ -150,8 +145,6 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -198,7 +191,8 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
     final prestador = Prestador(
       nome: nomeController.text.trim(),
       profissao: profissaoController.text.trim(),
-      categoria: categoriaSelecionada,
+      categoria: categoriasSelecionadas.first,
+      categorias: categoriasSelecionadas,
       distancia: "0.5 km",
       rating: 5.0,
       disponivel: true,
@@ -239,18 +233,15 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("Seja um prestador"),
-        backgroundColor: const Color(0xFF1E6FD9),
-        foregroundColor: Colors.white,
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
-
         child: Column(
           children: [
             Container(
@@ -284,9 +275,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
                           : null,
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
                   const Text(
                     "Adicionar foto profissional",
                     style: TextStyle(
@@ -294,9 +283,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 6),
-
                   const Text(
                     "Toque na imagem para tirar foto ou escolher da galeria",
                     textAlign: TextAlign.center,
@@ -308,98 +295,143 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
 
             const SizedBox(height: 24),
 
-            _secao("Dados pessoais"),
-
-            _campo("Nome completo", Icons.person, nomeController),
-            const SizedBox(height: 14),
-
-            _campo("Email", Icons.email, emailController),
-            const SizedBox(height: 14),
-
-            _campo("Telefone", Icons.phone, telefoneController),
-            const SizedBox(height: 24),
-
-            _secao("Dados profissionais"),
-
-            _campo("Profissão / Serviço", Icons.handyman, profissaoController),
-            const SizedBox(height: 14),
-
-            DropdownButtonFormField<String>(
-              value: categoriaSelecionada,
-              decoration: InputDecoration(
-                labelText: "Categoria",
-                prefixIcon: const Icon(Icons.category),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              items: categorias.map((c) {
-                return DropdownMenuItem(
-                  value: c,
-                  child: Text(c),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  categoriaSelecionada = value!;
-                });
-              },
-            ),
-
-            const SizedBox(height: 14),
-
-            _campo(
-              "Preço médio Ex: R\$ 80",
-              Icons.attach_money,
-              precoController,
-            ),
-
-            const SizedBox(height: 14),
-
-            _campo(
-              "Tempo de experiência",
-              Icons.timeline,
-              experienciaController,
-            ),
-
-            const SizedBox(height: 14),
-
-            TextField(
-              controller: descricaoController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                labelText: "Descrição profissional",
-                hintText: "Conte sobre sua experiência...",
-                prefixIcon: const Icon(Icons.description),
-                alignLabelWithHint: true,
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+            _card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _secao("Dados pessoais"),
+                  _campo("Nome completo", Icons.person, nomeController),
+                  const SizedBox(height: 14),
+                  _campo("Email", Icons.email, emailController),
+                  const SizedBox(height: 14),
+                  _campo("Telefone", Icons.phone, telefoneController),
+                ],
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            _secao("Localização"),
+            _card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _secao("Dados profissionais"),
+                  _campo(
+                    "Profissão / Serviço",
+                    Icons.handyman,
+                    profissaoController,
+                  ),
+                  const SizedBox(height: 18),
 
-            _campo("Cidade / Localização", Icons.location_on, cidadeController),
+                  const Text(
+                    "Categorias que você atende",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
 
-            const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: carregandoLocalizacao ? null : usarMinhaLocalizacao,
-                icon: const Icon(Icons.my_location),
-                label: Text(
-                  carregandoLocalizacao
-                      ? "Buscando localização..."
-                      : "Usar minha localização",
-                ),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: categorias.map((categoria) {
+                      final selecionada =
+                      categoriasSelecionadas.contains(categoria);
+
+                      return FilterChip(
+                        label: Text(categoria),
+                        selected: selecionada,
+                        backgroundColor: isDark
+                            ? const Color(0xFF0F172A)
+                            : Colors.white,
+                        selectedColor: const Color(0xFFEAF2FF),
+                        checkmarkColor: const Color(0xFF1E6FD9),
+                        labelStyle: TextStyle(
+                          color: selecionada
+                              ? const Color(0xFF1E6FD9)
+                              : Theme.of(context).textTheme.bodyMedium?.color,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        onSelected: (value) {
+                          setState(() {
+                            if (value) {
+                              categoriasSelecionadas.add(categoria);
+                            } else {
+                              if (categoriasSelecionadas.length > 1) {
+                                categoriasSelecionadas.remove(categoria);
+                              }
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  _campo(
+                    "Preço médio Ex: R\$ 80",
+                    Icons.attach_money,
+                    precoController,
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  _campo(
+                    "Tempo de experiência",
+                    Icons.timeline,
+                    experienciaController,
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  TextField(
+                    controller: descricaoController,
+                    maxLines: 4,
+                    decoration: const InputDecoration(
+                      labelText: "Descrição profissional",
+                      hintText: "Conte sobre sua experiência...",
+                      prefixIcon: Icon(Icons.description),
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            _card(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _secao("Localização"),
+                  _campo(
+                    "Cidade / Localização",
+                    Icons.location_on,
+                    cidadeController,
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: carregandoLocalizacao
+                          ? null
+                          : usarMinhaLocalizacao,
+                      icon: const Icon(Icons.my_location),
+                      label: Text(
+                        carregandoLocalizacao
+                            ? "Buscando localização..."
+                            : "Usar minha localização",
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -408,14 +440,6 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E6FD9),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
                 onPressed: salvando ? null : cadastrarPrestador,
                 icon: salvando
                     ? const SizedBox(
@@ -441,16 +465,13 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
   }
 
   Widget _secao(String titulo) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Text(
-          titulo,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 17,
-          ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        titulo,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 17,
         ),
       ),
     );
@@ -466,12 +487,29 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
       ),
+    );
+  }
+
+  Widget _card({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+        ],
+      ),
+      child: child,
     );
   }
 
@@ -480,13 +518,15 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
     required String titulo,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F7FA),
+          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA),
           borderRadius: BorderRadius.circular(18),
         ),
         child: Column(

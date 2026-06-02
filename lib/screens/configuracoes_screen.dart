@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
+import '../services/theme_service.dart';
 
 class ConfiguracoesScreen extends StatefulWidget {
   const ConfiguracoesScreen({super.key});
@@ -23,7 +24,7 @@ class _ConfiguracoesScreenState
 
   bool notificacoes = true;
   bool localizacao = true;
-  bool modoEscuro = false;
+  bool modoEscuro = ThemeService.isDark;
 
   @override
   void initState() {
@@ -87,6 +88,8 @@ class _ConfiguracoesScreenState
     showModalBottomSheet(
       context: context,
 
+      backgroundColor: Theme.of(context).cardColor,
+
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(28),
@@ -146,7 +149,6 @@ class _ConfiguracoesScreenState
                 "Conectando clientes e profissionais de forma rápida, moderna e segura.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.black87,
                   height: 1.5,
                 ),
               ),
@@ -173,8 +175,12 @@ class _ConfiguracoesScreenState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness ==
+        Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor:
+      Theme.of(context).scaffoldBackgroundColor,
 
       body: SafeArea(
         child: SingleChildScrollView(
@@ -337,7 +343,7 @@ class _ConfiguracoesScreenState
                 icon: Icons.dark_mode,
                 title: "Modo escuro",
                 subtitle:
-                "Ativar tema escuro futuramente",
+                "Alternar aparência do aplicativo",
 
                 value: modoEscuro,
 
@@ -346,14 +352,7 @@ class _ConfiguracoesScreenState
                     modoEscuro = value;
                   });
 
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        "Modo escuro em breve 🌙",
-                      ),
-                    ),
-                  );
+                  ThemeService.toggleTheme(value);
                 },
               ),
 
@@ -406,6 +405,17 @@ class _ConfiguracoesScreenState
               ),
 
               const SizedBox(height: 30),
+
+              Text(
+                isDark
+                    ? "Modo escuro ativado 🌙"
+                    : "Modo claro ativado ☀️",
+
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 13,
+                ),
+              ),
             ],
           ),
         ),
@@ -438,9 +448,15 @@ class _ConfiguracoesScreenState
     required TextEditingController controller,
     bool senha = false,
   }) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark
+            ? const Color(0xFF1E293B)
+            : Colors.white,
+
         borderRadius: BorderRadius.circular(18),
       ),
 
@@ -472,11 +488,17 @@ class _ConfiguracoesScreenState
     required bool value,
     required Function(bool) onChanged,
   }) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark
+            ? const Color(0xFF1E293B)
+            : Colors.white,
+
         borderRadius: BorderRadius.circular(20),
       ),
 
@@ -523,11 +545,17 @@ class _ConfiguracoesScreenState
     required String subtitulo,
     required VoidCallback onTap,
   }) {
+    final isDark =
+        Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark
+            ? const Color(0xFF1E293B)
+            : Colors.white,
+
         borderRadius: BorderRadius.circular(20),
       ),
 

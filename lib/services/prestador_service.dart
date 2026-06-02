@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models/prestador_model.dart';
 
 class PrestadorService {
@@ -9,40 +10,19 @@ class PrestadorService {
   static Future<void> adicionarPrestador(Prestador prestador) async {
     prestadores.add(prestador);
 
-    await _firestore.collection('prestadores').add({
-      'nome': prestador.nome,
-      'profissao': prestador.profissao,
-      'categoria': prestador.categoria,
-      'distancia': prestador.distancia,
-      'rating': prestador.rating,
-      'disponivel': prestador.disponivel,
-      'descricao': prestador.descricao,
-      'preco': prestador.preco,
-      'resposta': prestador.resposta,
-      'servicos': prestador.servicos,
-      'fotoUrl': prestador.fotoUrl,
-    });
+    await _firestore.collection('prestadores').add(prestador.toMap());
   }
 
   static Future<List<Prestador>> carregarPrestadores() async {
     final snapshot = await _firestore.collection('prestadores').get();
 
-    return snapshot.docs.map((doc) {
-      final data = doc.data();
-
-      return Prestador(
-        nome: data['nome'] ?? '',
-        profissao: data['profissao'] ?? '',
-        categoria: data['categoria'] ?? '',
-        distancia: data['distancia'] ?? '',
-        rating: (data['rating'] ?? 0).toDouble(),
-        disponivel: data['disponivel'] ?? true,
-        descricao: data['descricao'] ?? '',
-        preco: data['preco'] ?? '',
-        resposta: data['resposta'] ?? '',
-        servicos: data['servicos'] ?? '',
-        fotoUrl: data['fotoUrl'] ?? '',
-      );
+    final lista = snapshot.docs.map((doc) {
+      return Prestador.fromMap(doc.data());
     }).toList();
+
+    prestadores.clear();
+    prestadores.addAll(lista);
+
+    return lista;
   }
 }
