@@ -15,6 +15,28 @@ class FavoritosScreen extends StatefulWidget {
 }
 
 class _FavoritosScreenState extends State<FavoritosScreen> {
+  bool carregando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    carregarFavoritos();
+  }
+
+  Future<void> carregarFavoritos() async {
+    setState(() {
+      carregando = true;
+    });
+
+    await FavoritoService.carregarFavoritos();
+
+    if (!mounted) return;
+
+    setState(() {
+      carregando = false;
+    });
+  }
+
   Prestador? _buscarPrestador(String nome) {
     try {
       return PrestadorService.prestadores.firstWhere(
@@ -23,6 +45,22 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
     } catch (e) {
       return null;
     }
+  }
+
+  Prestador _prestadorDoFavorito(Map<String, dynamic> p) {
+    return Prestador(
+      nome: p["nome"] ?? "",
+      profissao: p["profissao"] ?? "",
+      categoria: p["categoria"] ?? "Serviço geral",
+      distancia: p["distancia"] ?? "0.5 km",
+      rating: (p["rating"] ?? 0).toDouble(),
+      disponivel: p["disponivel"] ?? true,
+      descricao: p["descricao"] ?? "Profissional salvo nos favoritos.",
+      preco: p["preco"] ?? "A combinar",
+      resposta: p["resposta"] ?? "~10 min",
+      servicos: p["servicos"] ?? "Novo",
+      fotoUrl: p["fotoUrl"] ?? "",
+    );
   }
 
   @override
@@ -34,45 +72,79 @@ class _FavoritosScreenState extends State<FavoritosScreen> {
       appBar: AppBar(
         title: const Text("Favoritos"),
         backgroundColor: const Color(0xFF1E6FD9),
+        foregroundColor: Colors.white,
       ),
-      body: favoritos.isEmpty
-          ? const Center(
-        child: Text("Nenhum favorito ainda"),
-      )
-          : ListView.builder(
-        padding: const EdgeInsets.only(top: 12, bottom: 20),
-        itemCount: favoritos.length,
-        itemBuilder: (context, index) {
-          final p = favoritos[index];
-
-          return PrestadorCard(
-            nome: p["nome"],
-            profissao: p["profissao"],
-            distancia: "${p["distancia"]} de distância",
-            rating: p["rating"],
-            disponivel: p["disponivel"],
-            favorito: true,
-            onFavoritoTap: () {
-              setState(() {
-                FavoritoService.alternarFavorito(p);
-              });
-            },
-            onTap: () {
-              final prestador = _buscarPrestador(p["nome"]);
-
-              if (prestador == null) return;
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PerfilPrestadorScreen(
-                    prestador: prestador,
-                  ),
+      body: RefreshIndicator(
+        onRefresh: carregarFavoritos,
+        child: carregando
+            ? const Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF1E6FD9),
+          ),
+        )
+            : favoritos.isEmpty
+            ? ListView(
+          children: const [
+            SizedBox(height: 160),
+            Icon(
+              Icons.favorite_border,
+              size: 70,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 14),
+            Center(
+              child: Text(
+                "Nenhum favorito ainda",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
                 ),
-              );
-            },
-          );
-        },
+              ),
+            ),
+            SizedBox(height: 6),
+            Center(
+              child: Text(
+                "Salve profissionais para acessar depois.",
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+          ],
+        )
+            : ListView.builder(
+          padding: const EdgeInsets.only(top: 12, bottom: 20),
+          itemCount: favoritos.length,
+          itemBuilder: (context, index) {
+            final p = favoritos[index];
+
+            return PrestadorCard(
+              nome: p["nome"] ?? "",
+              profissao: p["profissao"] ?? "",
+              distancia: "${p["distancia"] ?? "0.5 km"} de distância",
+              rating: (p["rating"] ?? 0).toDouble(),
+              disponivel: p["disponivel"] ?? true,
+              favorito: true,
+              fotoUrl: p["fotoUrl"] ?? "",
+              onFavoritoTap: () async {
+                await FavoritoService.alternarFavorito(p);
+                await carregarFavoritos();
+              },
+              onTap: () {
+                final prestador =
+                    _buscarPrestador(p["nome"] ?? "") ??
+                        _prestadorDoFavorito(p);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PerfilPrestadorScreen(
+                      prestador: prestador,
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

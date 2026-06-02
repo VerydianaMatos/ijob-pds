@@ -9,6 +9,7 @@ class Prestador {
   final String preco;
   final String resposta;
   final String servicos;
+  final String fotoUrl;
 
   Prestador({
     required this.nome,
@@ -21,5 +22,6 @@ class Prestador {
     required this.preco,
     required this.resposta,
     required this.servicos,
+    this.fotoUrl = "",
   });
 }

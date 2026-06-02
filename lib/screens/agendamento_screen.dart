@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import '../models/agendamento_model.dart';
+import '../models/prestador_model.dart';
 import '../services/agendamento_service.dart';
 
 class AgendamentoScreen extends StatefulWidget {
-  const AgendamentoScreen({super.key});
+  final Prestador prestador;
+
+  const AgendamentoScreen({
+    super.key,
+    required this.prestador,
+  });
 
   @override
   State<AgendamentoScreen> createState() => _AgendamentoScreenState();
@@ -12,6 +18,7 @@ class AgendamentoScreen extends StatefulWidget {
 class _AgendamentoScreenState extends State<AgendamentoScreen> {
   DateTime? dataSelecionada;
   String? horarioSelecionado;
+  bool salvando = false;
 
   final List<String> horarios = [
     "08:00",
@@ -29,17 +36,6 @@ class _AgendamentoScreenState extends State<AgendamentoScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2030),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            primaryColor: const Color(0xFF1E6FD9),
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF1E6FD9),
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null) {
@@ -49,7 +45,7 @@ class _AgendamentoScreenState extends State<AgendamentoScreen> {
     }
   }
 
-  void confirmarAgendamento() {
+  Future<void> confirmarAgendamento() async {
     if (dataSelecionada == null || horarioSelecionado == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -60,14 +56,24 @@ class _AgendamentoScreenState extends State<AgendamentoScreen> {
       return;
     }
 
-    AgendamentoService.adicionar(
+    setState(() {
+      salvando = true;
+    });
+
+    await AgendamentoService.adicionar(
       Agendamento(
-        nomePrestador: "Carlos Martins",
-        servico: "Serviço agendado",
+        nomePrestador: widget.prestador.nome,
+        servico: widget.prestador.profissao,
         data:
         "${dataSelecionada!.day}/${dataSelecionada!.month}/${dataSelecionada!.year} às $horarioSelecionado",
       ),
     );
+
+    if (!mounted) return;
+
+    setState(() {
+      salvando = false;
+    });
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -80,205 +86,157 @@ class _AgendamentoScreenState extends State<AgendamentoScreen> {
   }
 
   String get textoData {
-    if (dataSelecionada == null) {
-      return "Selecionar data";
-    }
-
+    if (dataSelecionada == null) return "Selecionar data";
     return "${dataSelecionada!.day}/${dataSelecionada!.month}/${dataSelecionada!.year}";
   }
 
   @override
   Widget build(BuildContext context) {
+    final prestador = widget.prestador;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-
       appBar: AppBar(
+        title: const Text("Agendar serviço"),
         backgroundColor: const Color(0xFF1E6FD9),
         foregroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          "Agendar serviço",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
-
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            color: const Color(0xFF1E6FD9),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    prestador.nome.substring(0, 1).toUpperCase(),
+                    style: const TextStyle(
+                      color: Color(0xFF1E6FD9),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Escolha a data",
-                      style: TextStyle(
+                    Text(
+                      prestador.nome,
+                      style: const TextStyle(
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 17,
                       ),
                     ),
-
-                    const SizedBox(height: 12),
-
-                    InkWell(
-                      onTap: selecionarData,
-                      borderRadius: BorderRadius.circular(18),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 18,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: Colors.grey.withOpacity(0.15),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.calendar_month,
-                              color: Color(0xFF1E6FD9),
-                              size: 28,
-                            ),
-
-                            const SizedBox(width: 14),
-
-                            Expanded(
-                              child: Text(
-                                textoData,
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: dataSelecionada == null
-                                      ? Colors.grey[700]
-                                      : Colors.black,
-                                  fontWeight: dataSelecionada == null
-                                      ? FontWeight.normal
-                                      : FontWeight.bold,
-                                ),
-                              ),
-                            ),
-
-                            const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                              color: Color(0xFF1E6FD9),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    const Text(
-                      "Escolha o horário",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                      ),
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: horarios.map((horario) {
-                        final selecionado =
-                            horarioSelecionado == horario;
-
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              horarioSelecionado = horario;
-                            });
-                          },
-                          child: Container(
-                            width: 92,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: selecionado
-                                  ? const Color(0xFF1E6FD9)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: selecionado
-                                    ? const Color(0xFF1E6FD9)
-                                    : const Color(0xFFBFD6F6),
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.025),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              horario,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: selecionado
-                                    ? Colors.white
-                                    : const Color(0xFF1E6FD9),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                    Text(
+                      prestador.profissao,
+                      style: const TextStyle(color: Colors.white70),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
+          ),
 
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 18),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E6FD9),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    elevation: 4,
-                    shadowColor: Colors.black.withOpacity(0.25),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Escolha a data",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+                  ),
+                  const SizedBox(height: 12),
+
+                  InkWell(
+                    onTap: selecionarData,
+                    borderRadius: BorderRadius.circular(18),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_month,
+                            color: Color(0xFF1E6FD9),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(child: Text(textoData)),
+                          const Icon(Icons.arrow_forward_ios, size: 16),
+                        ],
+                      ),
                     ),
                   ),
-                  onPressed: confirmarAgendamento,
-                  icon: const Icon(Icons.calendar_month),
-                  label: const Text(
-                    "Confirmar agendamento",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
+
+                  const SizedBox(height: 26),
+
+                  const Text(
+                    "Escolha o horário",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                   ),
-                ),
+                  const SizedBox(height: 12),
+
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: horarios.map((h) {
+                      final selecionado = horarioSelecionado == h;
+
+                      return ChoiceChip(
+                        label: Text(h),
+                        selected: selecionado,
+                        selectedColor: const Color(0xFF1E6FD9),
+                        labelStyle: TextStyle(
+                          color: selecionado ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        onSelected: (_) {
+                          setState(() {
+                            horarioSelecionado = h;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E6FD9),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                onPressed: salvando ? null : confirmarAgendamento,
+                icon: salvando
+                    ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                    : const Icon(Icons.check),
+                label: Text(salvando ? "Salvando..." : "Confirmar agendamento"),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

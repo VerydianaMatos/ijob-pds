@@ -9,7 +9,9 @@ class AvaliacaoScreen extends StatefulWidget {
 
 class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
   int estrelas = 0;
-  final TextEditingController comentarioController = TextEditingController();
+
+  final TextEditingController comentarioController =
+  TextEditingController();
 
   final List<String> tags = [
     "Pontual",
@@ -17,23 +19,116 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
     "Preço justo",
     "Rápido",
     "Organizado",
+    "Atencioso",
+    "Profissional",
   ];
 
   final List<String> selecionadas = [];
 
-  void enviarAvaliacao() {
+  bool enviando = false;
+
+  void enviarAvaliacao() async {
     if (estrelas == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Selecione uma nota em estrelas.")),
+        const SnackBar(
+          content: Text("Selecione uma nota em estrelas."),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Avaliação enviada com sucesso!")),
-    );
+    setState(() {
+      enviando = true;
+    });
 
-    Navigator.pop(context);
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (!mounted) return;
+
+    setState(() {
+      enviando = false;
+    });
+
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 74,
+                height: 74,
+
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+
+                child: const Icon(
+                  Icons.check,
+                  size: 42,
+                  color: Colors.green,
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              const Text(
+                "Avaliação enviada!",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              const Text(
+                "Obrigado pelo seu feedback ✨",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+
+              const SizedBox(height: 22),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Fechar"),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  String get textoNota {
+    switch (estrelas) {
+      case 1:
+        return "Muito ruim";
+      case 2:
+        return "Ruim";
+      case 3:
+        return "Bom";
+      case 4:
+        return "Muito bom";
+      case 5:
+        return "Excelente";
+      default:
+        return "Toque nas estrelas para avaliar";
+    }
   }
 
   @override
@@ -46,50 +141,61 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
+
       appBar: AppBar(
         title: const Text("Avaliar serviço"),
         backgroundColor: const Color(0xFF1E6FD9),
+        foregroundColor: Colors.white,
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
+
         child: Column(
           children: [
+
+            // CARD PROFISSIONAL
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
+
+              padding: const EdgeInsets.all(24),
+
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF1E6FD9),
+                    Color(0xFF3D8BFF),
+                  ],
+                ),
+
+                borderRadius: BorderRadius.circular(28),
               ),
+
               child: Column(
                 children: [
+
                   const CircleAvatar(
-                    radius: 42,
-                    backgroundColor: Color(0xFFE3F0FF),
+                    radius: 44,
+                    backgroundColor: Colors.white,
+
                     child: Text(
                       "CM",
                       style: TextStyle(
                         color: Color(0xFF1E6FD9),
                         fontWeight: FontWeight.bold,
-                        fontSize: 24,
+                        fontSize: 26,
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 14),
 
                   const Text(
                     "Carlos Martins",
                     style: TextStyle(
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 20,
                     ),
                   ),
 
@@ -97,71 +203,120 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
 
                   const Text(
                     "Eletricista",
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                      color: Colors.white70,
+                    ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
                   const Text(
-                    "Como foi o serviço?",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    "Como foi sua experiência?",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+
                     children: List.generate(5, (index) {
                       final ativo = index < estrelas;
 
-                      return IconButton(
-                        onPressed: () {
+                      return GestureDetector(
+                        onTap: () {
                           setState(() {
                             estrelas = index + 1;
                           });
                         },
-                        icon: Icon(
-                          Icons.star,
-                          size: 34,
-                          color: ativo ? Colors.orange : Colors.grey[300],
+
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+
+                          child: Icon(
+                            ativo
+                                ? Icons.star_rounded
+                                : Icons.star_border_rounded,
+
+                            size: 42,
+
+                            color: ativo
+                                ? Colors.orangeAccent
+                                : Colors.white54,
+                          ),
                         ),
                       );
                     }),
                   ),
 
+                  const SizedBox(height: 12),
+
                   Text(
-                    estrelas == 0
-                        ? "Toque nas estrelas para avaliar"
-                        : "$estrelas de 5 estrelas",
-                    style: const TextStyle(color: Colors.grey),
+                    textoNota,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                    ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
+            // TAGS
             Align(
               alignment: Alignment.centerLeft,
+
               child: const Text(
                 "Destaques do atendimento",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 10,
+              runSpacing: 10,
+
               children: tags.map((tag) {
-                final selecionada = selecionadas.contains(tag);
+                final selecionada =
+                selecionadas.contains(tag);
 
                 return FilterChip(
                   label: Text(tag),
+
                   selected: selecionada,
-                  selectedColor: const Color(0xFFE3F0FF),
-                  checkmarkColor: const Color(0xFF1E6FD9),
+
+                  backgroundColor: Colors.white,
+
+                  selectedColor:
+                  const Color(0xFFEAF2FF),
+
+                  checkmarkColor:
+                  const Color(0xFF1E6FD9),
+
+                  labelStyle: TextStyle(
+                    color: selecionada
+                        ? const Color(0xFF1E6FD9)
+                        : Colors.black87,
+
+                    fontWeight: FontWeight.w600,
+                  ),
+
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.circular(24),
+                  ),
+
                   onSelected: (value) {
                     setState(() {
                       if (value) {
@@ -175,50 +330,76 @@ class _AvaliacaoScreenState extends State<AvaliacaoScreen> {
               }).toList(),
             ),
 
-            const SizedBox(height: 20),
-
-            Align(
-              alignment: Alignment.centerLeft,
-              child: const Text(
-                "Comentário",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            TextField(
-              controller: comentarioController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: "Conte como foi sua experiência...",
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-
             const SizedBox(height: 24),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E6FD9),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+            // COMENTARIO
+            Align(
+              alignment: Alignment.centerLeft,
+
+              child: const Text(
+                "Comentário",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
-                onPressed: enviarAvaliacao,
-                icon: const Icon(Icons.send),
-                label: const Text("Enviar avaliação"),
               ),
             ),
+
+            const SizedBox(height: 12),
+
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+              ),
+
+              child: TextField(
+                controller: comentarioController,
+
+                maxLines: 5,
+
+                decoration: const InputDecoration(
+                  hintText:
+                  "Conte como foi sua experiência com o profissional...",
+
+                  border: InputBorder.none,
+
+                  contentPadding: EdgeInsets.all(18),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // BOTAO
+            SizedBox(
+              width: double.infinity,
+
+              child: ElevatedButton.icon(
+                onPressed:
+                enviando ? null : enviarAvaliacao,
+
+                icon: enviando
+                    ? const SizedBox(
+                  width: 18,
+                  height: 18,
+
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                    : const Icon(Icons.send),
+
+                label: Text(
+                  enviando
+                      ? "Enviando..."
+                      : "Enviar avaliação",
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
           ],
         ),
       ),

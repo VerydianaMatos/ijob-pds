@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../models/prestador_model.dart';
@@ -42,7 +44,6 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E6FD9),
         foregroundColor: Colors.white,
@@ -61,6 +62,7 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                   "distancia": prestador.distancia,
                   "rating": prestador.rating,
                   "disponivel": prestador.disponivel,
+                  "fotoUrl": prestador.fotoUrl,
                 });
               });
             },
@@ -71,7 +73,6 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
           ),
         ],
       ),
-
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -87,29 +88,24 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
               child: Column(
                 children: [
                   CircleAvatar(
-                    radius: 44,
+                    radius: 50,
                     backgroundColor: Colors.white,
-                    child: Container(
-                      width: 84,
-                      height: 84,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFFE3F0FF),
+                    backgroundImage: prestador.fotoUrl.isNotEmpty
+                        ? FileImage(File(prestador.fotoUrl))
+                        : null,
+                    child: prestador.fotoUrl.isEmpty
+                        ? Text(
+                      _iniciais(prestador.nome),
+                      style: const TextStyle(
+                        fontSize: 26,
+                        color: Color(0xFF1E6FD9),
+                        fontWeight: FontWeight.bold,
                       ),
-                      child: Center(
-                        child: Text(
-                          _iniciais(prestador.nome),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            color: Color(0xFF1E6FD9),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
+                    )
+                        : null,
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
 
                   Text(
                     prestador.nome,
@@ -320,12 +316,22 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                       ),
                       onPressed: () async {
                         if (!AuthService.isLogged) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Para agendar, você precisa fazer login.",
+                              ),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => LoginScreen(),
+                              builder: (_) => const LoginScreen(),
                             ),
                           );
+
                           setState(() {});
                           return;
                         }
@@ -333,7 +339,9 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const AgendamentoScreen(),
+                            builder: (_) => AgendamentoScreen(
+                              prestador: widget.prestador,
+                            ),
                           ),
                         );
 
@@ -416,37 +424,23 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
 
   List<Widget> _chipsPorCategoria(String categoria) {
     final Map<String, List<String>> dados = {
-      "Elétrica": [
-        "Instalações",
-        "Reparos",
-        "Quadro elétrico",
-        "Tomadas",
-        "Iluminação",
-      ],
-      "Limpeza": [
-        "Limpeza residencial",
-        "Limpeza pesada",
-        "Organização",
-        "Faxina completa",
-      ],
-      "Hidráulica": [
-        "Vazamentos",
-        "Encanamento",
-        "Torneiras",
-        "Manutenção",
-      ],
-      "Pintura": [
-        "Pintura interna",
-        "Pintura externa",
-        "Acabamento",
-        "Textura",
-      ],
-      "Frete": [
-        "Mudanças",
-        "Entregas",
-        "Transporte",
-        "Carretos",
-      ],
+      "Elétrica": ["Instalações", "Reparos", "Quadro elétrico", "Tomadas"],
+      "Limpeza": ["Limpeza residencial", "Limpeza pesada", "Organização"],
+      "Hidráulica": ["Vazamentos", "Encanamento", "Torneiras"],
+      "Pintura": ["Pintura interna", "Pintura externa", "Acabamento"],
+      "Frete": ["Mudanças", "Entregas", "Transporte"],
+      "Montagem": ["Móveis", "Prateleiras", "Instalação"],
+      "Jardinagem": ["Jardim", "Poda", "Gramado"],
+      "Ar-condicionado": ["Instalação", "Limpeza", "Manutenção"],
+      "Diarista": ["Casa", "Apartamento", "Escritório"],
+      "Pedreiro": ["Reformas", "Construção", "Acabamento"],
+      "Marceneiro": ["Móveis planejados", "Reparos", "Portas"],
+      "Chaveiro": ["Cópia de chaves", "Abertura", "Fechaduras"],
+      "Informática": ["Computadores", "Formatação", "Redes"],
+      "Aulas": ["Reforço escolar", "Idiomas", "Música"],
+      "Babá": ["Crianças", "Acompanhamento", "Cuidados"],
+      "Mecânico": ["Carros", "Motos", "Diagnóstico"],
+      "Reformas": ["Casa", "Apartamento", "Manutenção geral"],
     };
 
     final lista = dados[categoria] ?? ["Serviço geral"];
@@ -476,7 +470,7 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
     final partes = nome.trim().split(" ");
 
     if (partes.length == 1) {
-      return partes.first[0].toUpperCase();
+      return partes[0][0].toUpperCase();
     }
 
     return "${partes[0][0]}${partes[1][0]}".toUpperCase();

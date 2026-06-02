@@ -1,59 +1,48 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/prestador_model.dart';
 
 class PrestadorService {
-  static List<Prestador> prestadores = [
-    Prestador(
-      nome: "Carlos Martins",
-      profissao: "Eletricista",
-      categoria: "Elétrica",
-      distancia: "1.2 km",
-      rating: 4.9,
-      disponivel: true,
-      descricao:
-      "Profissional com 8 anos de experiência em instalações e reparos elétricos.",
-      preco: "R\$ 80",
-      resposta: "~10 min",
-      servicos: "120+",
-    ),
-    Prestador(
-      nome: "Ana Silva",
-      profissao: "Faxineira",
-      categoria: "Limpeza",
-      distancia: "0.8 km",
-      rating: 4.8,
-      disponivel: true,
-      descricao: "Especialista em limpeza residencial e comercial.",
-      preco: "R\$ 60",
-      resposta: "~5 min",
-      servicos: "200+",
-    ),
-    Prestador(
-      nome: "Roberto Prado",
-      profissao: "Encanador",
-      categoria: "Hidráulica",
-      distancia: "2.1 km",
-      rating: 4.7,
-      disponivel: false,
-      descricao: "Atendimento rápido para vazamentos e manutenção hidráulica.",
-      preco: "R\$ 90",
-      resposta: "~15 min",
-      servicos: "95+",
-    ),
-    Prestador(
-      nome: "Marcos Lima",
-      profissao: "Pintor",
-      categoria: "Pintura",
-      distancia: "1.9 km",
-      rating: 4.6,
-      disponivel: true,
-      descricao: "Pintura residencial e acabamento profissional.",
-      preco: "R\$ 120",
-      resposta: "~20 min",
-      servicos: "80+",
-    ),
-  ];
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  static void adicionarPrestador(Prestador prestador) {
+  static final List<Prestador> prestadores = [];
+
+  static Future<void> adicionarPrestador(Prestador prestador) async {
     prestadores.add(prestador);
+
+    await _firestore.collection('prestadores').add({
+      'nome': prestador.nome,
+      'profissao': prestador.profissao,
+      'categoria': prestador.categoria,
+      'distancia': prestador.distancia,
+      'rating': prestador.rating,
+      'disponivel': prestador.disponivel,
+      'descricao': prestador.descricao,
+      'preco': prestador.preco,
+      'resposta': prestador.resposta,
+      'servicos': prestador.servicos,
+      'fotoUrl': prestador.fotoUrl,
+    });
+  }
+
+  static Future<List<Prestador>> carregarPrestadores() async {
+    final snapshot = await _firestore.collection('prestadores').get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+
+      return Prestador(
+        nome: data['nome'] ?? '',
+        profissao: data['profissao'] ?? '',
+        categoria: data['categoria'] ?? '',
+        distancia: data['distancia'] ?? '',
+        rating: (data['rating'] ?? 0).toDouble(),
+        disponivel: data['disponivel'] ?? true,
+        descricao: data['descricao'] ?? '',
+        preco: data['preco'] ?? '',
+        resposta: data['resposta'] ?? '',
+        servicos: data['servicos'] ?? '',
+        fotoUrl: data['fotoUrl'] ?? '',
+      );
+    }).toList();
   }
 }

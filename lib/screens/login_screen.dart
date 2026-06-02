@@ -1,113 +1,174 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+
 import '../services/auth_service.dart';
+import 'home_screen.dart';
+import 'cadastro_screen.dart';
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
+
+  bool carregando = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    senhaController.dispose();
+    super.dispose();
+  }
+
+  Future<void> entrar() async {
+    final email = emailController.text.trim();
+    final senha = senhaController.text.trim();
+
+    if (email.isEmpty || senha.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Preencha email e senha."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      carregando = true;
+    });
+
+    final erro = await AuthService.loginCliente(
+      emailUser: email,
+      senha: senha,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      carregando = false;
+    });
+
+    if (erro != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(erro),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // 👈 fundo branco
+      backgroundColor: Colors.white,
 
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF1E6FD9)),
+        foregroundColor: const Color(0xFF1E6FD9),
       ),
 
       body: Center(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              Image.asset(
+                'assets/imagens/logo.png',
+                height: 90,
+              ),
 
-            child: Column(
-              children: [
+              const SizedBox(height: 30),
 
-                // 🔵 LOGO
-                Image.asset(
-                  'assets/imagens/logo.png',
-                  height: 90,
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E6FD9),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-
-                const SizedBox(height: 30),
-
-                // 🔵 CARD AZUL
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E6FD9),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      )
-                    ],
-                  ),
-
-                  child: Column(
-                    children: [
-
-                      const Text(
-                        "Entrar na conta",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
+                child: Column(
+                  children: [
+                    const Text(
+                      "Entrar na conta",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
                       ),
+                    ),
 
-                      const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                      _campo("Email", Icons.email, emailController),
+                    _campo("Email", Icons.email, emailController),
 
-                      const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                      _campo("Senha", Icons.lock, senhaController, senha: true),
+                    _campo(
+                      "Senha",
+                      Icons.lock,
+                      senhaController,
+                      senha: true,
+                    ),
 
-                      const SizedBox(height: 18),
+                    const SizedBox(height: 18),
 
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF1E6FD9),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF1E6FD9),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                          onPressed: () {
-                            AuthService.loginCliente(
-                              emailController.text.isEmpty
-                                  ? "Cliente"
-                                  : emailController.text,
-                              emailController.text.isEmpty
-                                  ? "cliente@email.com"
-                                  : emailController.text,
-                            );
-
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const HomeScreen(),
-                              ),
-                            );
-                          },
-                          child: const Text("Entrar"),
                         ),
+                        onPressed: carregando ? null : entrar,
+                        child: carregando
+                            ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFF1E6FD9),
+                          ),
+                        )
+                            : const Text("Entrar"),
                       ),
-                    ],
-                  ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CadastroScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Ainda não tenho conta",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -123,16 +184,11 @@ class LoginScreen extends StatelessWidget {
     return TextField(
       controller: controller,
       obscureText: senha,
-      style: const TextStyle(color: Colors.black),
-
       decoration: InputDecoration(
         hintText: label,
-        hintStyle: const TextStyle(color: Colors.grey),
         prefixIcon: Icon(icon, color: Colors.grey),
-
         filled: true,
         fillColor: Colors.white,
-
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
