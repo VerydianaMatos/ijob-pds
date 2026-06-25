@@ -1,30 +1,32 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class CategoriaList extends StatelessWidget {
   const CategoriaList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final categorias = ["Limpeza", "Elétrica", "Pintura", "Frete", "Encanador"];
+    final categorias = [
+      "Limpeza",
+      "Elétrica",
+      "Pintura",
+      "Frete",
+      "Encanador"
+    ];
 
-    return SizedBox(
+    return Container(
       height: 60,
+      margin: const EdgeInsets.only(top: 10),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
         itemCount: categorias.length,
         itemBuilder: (context, index) {
           return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            alignment: Alignment.center,
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: colorScheme.outlineVariant.withOpacity(0.35),
-              ),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Text(categorias[index]),
           );
@@ -33,6 +35,3 @@ class CategoriaList extends StatelessWidget {
     );
   }
 }
-
-
-

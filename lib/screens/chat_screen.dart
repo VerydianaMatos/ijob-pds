@@ -1,18 +1,7 @@
-﻿import 'package:flutter/material.dart';
-
-import '../models/mensagem_model.dart';
-import '../services/auth_service.dart';
-import '../services/chat_service.dart';
+import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String contato;
-  final String? chatId;
-
-  const ChatScreen({
-    super.key,
-    this.contato = "Atendimento",
-    this.chatId,
-  });
+  const ChatScreen({super.key});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -21,26 +10,38 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController mensagemController = TextEditingController();
 
-  String get meuNome => AuthService.nome.isEmpty ? "Usuário" : AuthService.nome;
+  final List<Map<String, dynamic>> mensagens = [
+    {
+      "texto": "Olá! Tudo bem? Posso ajudar com seu serviço.",
+      "minha": false,
+      "hora": "14:05",
+    },
+    {
+      "texto": "Olá! Preciso de uma instalação elétrica.",
+      "minha": true,
+      "hora": "14:06",
+    },
+    {
+      "texto": "Claro! Você já pode me passar mais detalhes.",
+      "minha": false,
+      "hora": "14:07",
+    },
+  ];
 
-  String get idConversa {
-    return widget.chatId ?? ChatService.chatId(meuNome, widget.contato);
-  }
-
-  Future<void> enviarMensagem() async {
+  void enviarMensagem() {
     final texto = mensagemController.text.trim();
+
     if (texto.isEmpty) return;
 
-    mensagemController.clear();
+    setState(() {
+      mensagens.add({
+        "texto": texto,
+        "minha": true,
+        "hora": "Agora",
+      });
 
-    await ChatService.enviar(
-      Mensagem(
-        chatId: idConversa,
-        texto: texto,
-        autor: meuNome,
-        criadoEm: DateTime.now(),
-      ),
-    );
+      mensagemController.clear();
+    });
   }
 
   @override
@@ -51,168 +52,141 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
+
       appBar: AppBar(
+        backgroundColor: const Color(0xFF1E6FD9),
         title: Row(
-          children: [
+          children: const [
             CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
-                _iniciais(widget.contato),
+                "CM",
                 style: TextStyle(
-                  color: colorScheme.primary,
+                  color: Color(0xFF1E6FD9),
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.contato, style: const TextStyle(fontSize: 16)),
-                  const Text(
-                    "Conversa salva",
-                    style: TextStyle(fontSize: 12, color: Colors.white70),
-                  ),
-                ],
-              ),
+            SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Carlos Martins",
+                  style: TextStyle(fontSize: 16),
+                ),
+                Text(
+                  "Online agora",
+                  style: TextStyle(fontSize: 12, color: Colors.white70),
+                ),
+              ],
             ),
           ],
         ),
       ),
+
       body: Column(
         children: [
           Expanded(
-            child: StreamBuilder<List<Mensagem>>(
-              stream: ChatService.mensagens(idConversa),
-              builder: (context, snapshot) {
-                final mensagens = snapshot.data ?? [];
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: mensagens.length,
+              itemBuilder: (context, index) {
+                final msg = mensagens[index];
+                final minha = msg["minha"] as bool;
 
-                if (mensagens.isEmpty) {
-                  return Center(
-                    child: Text(
-                      "Nenhuma mensagem ainda.",
-                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                return Align(
+                  alignment:
+                  minha ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.72,
                     ),
-                  );
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: mensagens.length,
-                  itemBuilder: (context, index) {
-                    final msg = mensagens[index];
-                    final minha = msg.autor == meuNome;
-
-                    return Align(
-                      alignment:
-                          minha ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.72,
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: minha ? colorScheme.primary : colorScheme.surface,
-                          borderRadius: BorderRadius.only(
-                            topLeft: const Radius.circular(16),
-                            topRight: const Radius.circular(16),
-                            bottomLeft: Radius.circular(minha ? 16 : 4),
-                            bottomRight: Radius.circular(minha ? 4 : 16),
-                          ),
-                          border: minha
-                              ? null
-                              : Border.all(
-                                  color: colorScheme.outlineVariant
-                                      .withOpacity(0.35),
-                                ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: minha
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              msg.texto,
-                              style: TextStyle(
-                                color: minha
-                                    ? colorScheme.onPrimary
-                                    : colorScheme.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              _hora(msg.criadoEm),
-                              style: TextStyle(
-                                color: minha
-                                    ? colorScheme.onPrimary.withOpacity(0.72)
-                                    : colorScheme.onSurfaceVariant,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: minha ? const Color(0xFF1E6FD9) : Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(16),
+                        topRight: const Radius.circular(16),
+                        bottomLeft: Radius.circular(minha ? 16 : 4),
+                        bottomRight: Radius.circular(minha ? 4 : 16),
                       ),
-                    );
-                  },
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 8,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: minha
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          msg["texto"],
+                          style: TextStyle(
+                            color: minha ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          msg["hora"],
+                          style: TextStyle(
+                            color: minha ? Colors.white70 : Colors.grey,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
             ),
           ),
-          SafeArea(
-            top: false,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                border: Border(
-                  top: BorderSide(
-                    color: colorScheme.outlineVariant.withOpacity(0.35),
-                  ),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: mensagemController,
-                      decoration: const InputDecoration(
-                        hintText: "Digite sua mensagem...",
-                        prefixIcon: Icon(Icons.message),
+
+          Container(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+            color: Colors.white,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: mensagemController,
+                    decoration: InputDecoration(
+                      hintText: "Digite sua mensagem...",
+                      filled: true,
+                      fillColor: const Color(0xFFF5F7FA),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    icon: const Icon(Icons.send),
+                ),
+
+                const SizedBox(width: 8),
+
+                CircleAvatar(
+                  backgroundColor: const Color(0xFF1E6FD9),
+                  child: IconButton(
+                    icon: const Icon(Icons.send, color: Colors.white),
                     onPressed: enviarMensagem,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
-
-  String _hora(DateTime data) {
-    final hora = data.hour.toString().padLeft(2, "0");
-    final minuto = data.minute.toString().padLeft(2, "0");
-    return "$hora:$minuto";
-  }
-
-  String _iniciais(String nome) {
-    final partes = nome.trim().split(" ");
-    if (partes.isEmpty || partes.first.isEmpty) return "A";
-    if (partes.length == 1) return partes.first[0].toUpperCase();
-    return "${partes[0][0]}${partes[1][0]}".toUpperCase();
-  }
 }
-
-
-
