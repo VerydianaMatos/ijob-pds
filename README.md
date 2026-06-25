@@ -1,1 +1,17 @@
-O iJob é um aplicativo mobile desenvolvido em Flutter com o objetivo de conectar clientes e prestadores de serviços em uma única plataforma. A aplicação permite que usuários encontrem profissionais de diferentes áreas, visualizem perfis, realizem agendamentos, troquem mensagens e acompanhem informações relacionadas aos serviços contratados. O projeto foi criado como Trabalho de Conclusão de Curso do curso de Análise e Desenvolvimento de Sistemas da ULBRA, buscando oferecer uma solução mais prática, organizada e acessível para a contratação de serviços, reduzindo a dependência de indicações realizadas em redes sociais e aplicativos de mensagens. Para o desenvolvimento foram utilizadas tecnologias como Flutter, Dart, Firebase, Android Studio e Figma. 
+# ijob_app
+
+A new Flutter project.
+
+## Getting Started
+
+This project is a starting point for a Flutter application.
+
+A few resources to get you started if this is your first Flutter project:
+
+- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
+- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
