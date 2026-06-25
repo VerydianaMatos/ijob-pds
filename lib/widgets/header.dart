@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class Header extends StatelessWidget {
   const Header({super.key});
@@ -13,7 +13,7 @@ class Header extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Olá 👋", style: TextStyle(fontSize: 16)),
+              Text("Olá ðŸ‘‹", style: TextStyle(fontSize: 16)),
               Text("Encontre um serviço",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ],
@@ -24,3 +24,5 @@ class Header extends StatelessWidget {
     );
   }
 }
+
+

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class ServicoList extends StatelessWidget {
   const ServicoList({super.key});
@@ -49,3 +49,5 @@ class ServicoList extends StatelessWidget {
     );
   }
 }
+
+

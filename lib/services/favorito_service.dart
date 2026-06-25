@@ -1,4 +1,4 @@
-class FavoritoService {
+﻿class FavoritoService {
   static final List<Map<String, dynamic>> favoritos = [];
 
   static bool isFavorito(String nome) {
@@ -13,3 +13,5 @@ class FavoritoService {
     }
   }
 }
+
+
