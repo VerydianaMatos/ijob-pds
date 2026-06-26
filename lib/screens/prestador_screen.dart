@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../models/prestador_model.dart';
 import '../services/auth_service.dart';
@@ -114,9 +114,9 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
   }
 
   void _mostrarMensagem(String mensagem, Color cor) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensagem), backgroundColor: cor),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(mensagem), backgroundColor: cor));
   }
 
   double? distanciaEmKmDoPrestador(Prestador prestador) {
@@ -197,9 +197,11 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
 
     final filtrados = origem.where((p) {
       final combinaCategoria =
-          categoriaSelecionada == "Todos" || p.categoria == categoriaSelecionada;
+          categoriaSelecionada == "Todos" ||
+          p.categoria == categoriaSelecionada;
 
-      final combinaBusca = textoBusca.isEmpty ||
+      final combinaBusca =
+          textoBusca.isEmpty ||
           p.nome.toLowerCase().contains(textoBusca) ||
           p.profissao.toLowerCase().contains(textoBusca) ||
           p.categoria.toLowerCase().contains(textoBusca);
@@ -293,15 +295,15 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _topo(),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 14),
+                  _campoBusca(),
+                  const SizedBox(height: 14),
+                  _listaCategorias(),
+                  const SizedBox(height: 14),
                   _cardLocalizacao(),
                   const SizedBox(height: 10),
                   _botaoPrestadoresProximos(),
                   const SizedBox(height: 18),
-                  _campoBusca(),
-                  const SizedBox(height: 18),
-                  _listaCategorias(),
-                  const SizedBox(height: 20),
                   _cabecalhoLista(snapshot.connectionState),
                   const SizedBox(height: 10),
                   if (prestadores.isEmpty) _estadoVazio(),
@@ -324,7 +326,7 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       decoration: BoxDecoration(
         color: primary,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
@@ -374,95 +376,24 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 18),
           const Text(
-            "Encontre profissionais perto de você",
+            "Serviços perto de você",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 25,
+              fontSize: 24,
               fontWeight: FontWeight.w900,
               height: 1.05,
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            "Agende serviços, acompanhe solicitações e fale com prestadores reais.",
-            style: TextStyle(color: Colors.white70, height: 1.35),
-          ),
-          const SizedBox(height: 18),
-          Row(
-            children: [
-              _topoInfo(Icons.verified, "Perfis", "verificados"),
-              const SizedBox(width: 10),
-              _topoInfo(Icons.schedule, "Agenda", "por horário"),
-              const SizedBox(width: 10),
-              _topoInfo(Icons.map, "Mapa", "real"),
-            ],
+          const SizedBox(height: 6),
+          Text(
+            localizacaoAtiva
+                ? "Profissionais ordenados pela sua localização."
+                : "Ative a localização para ver quem atende sua região.",
+            style: const TextStyle(color: Colors.white70, height: 1.3),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _topoInfo(IconData icon, String title, String subtitle) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: Colors.white, size: 18),
-            const SizedBox(height: 7),
-            Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 12,
-              ),
-            ),
-            Text(
-              subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white70, fontSize: 11),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _avisoBancoOffline() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.orange.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.orange.withOpacity(0.35)),
-        ),
-        child: const Row(
-          children: [
-            Icon(Icons.cloud_off, color: Colors.orange),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                "Banco indisponível agora. Mostrando dados salvos.",
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -503,8 +434,9 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color:
-                        cardAtivo ? colorScheme.primary : colorScheme.onSurface,
+                    color: cardAtivo
+                        ? colorScheme.primary
+                        : colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -512,7 +444,10 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: cardAtivo ? colorScheme.surface : colorScheme.primary,
                   borderRadius: BorderRadius.circular(20),
@@ -520,8 +455,9 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
                 child: Text(
                   statusLocalizacao,
                   style: TextStyle(
-                    color:
-                        cardAtivo ? colorScheme.primary : colorScheme.onPrimary,
+                    color: cardAtivo
+                        ? colorScheme.primary
+                        : colorScheme.onPrimary,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
@@ -564,11 +500,15 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  ativo ? "Mostrar todos os prestadores" : "Prestadores próximos de você",
+                  ativo
+                      ? "Mostrar todos os prestadores"
+                      : "Prestadores próximos de você",
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: ativo ? colorScheme.onPrimary : colorScheme.onSurface,
+                    color: ativo
+                        ? colorScheme.onPrimary
+                        : colorScheme.onSurface,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -677,7 +617,8 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
                 ),
               ),
             ),
-          if (buscaController.text.isNotEmpty || categoriaSelecionada != "Todos")
+          if (buscaController.text.isNotEmpty ||
+              categoriaSelecionada != "Todos")
             TextButton(onPressed: limparBusca, child: const Text("Limpar")),
         ],
       ),
@@ -796,7 +737,9 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.35)),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withOpacity(0.35),
+          ),
         ),
         child: Column(
           children: [
@@ -865,6 +808,3 @@ class _PrestadorScreenState extends State<PrestadorScreen> {
     );
   }
 }
-
-
-

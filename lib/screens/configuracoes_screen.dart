@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -37,7 +37,9 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
     nomeController = TextEditingController(text: AuthService.nome);
     emailController = TextEditingController(text: AuthService.email);
     telefoneController = TextEditingController(text: AuthService.telefone);
-    localizacaoController = TextEditingController(text: AuthService.localizacao);
+    localizacaoController = TextEditingController(
+      text: AuthService.localizacao,
+    );
     novaSenhaController = TextEditingController();
     confirmarSenhaController = TextEditingController();
   }
@@ -67,7 +69,10 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
 
     if (novaSenha.isNotEmpty || confirmarSenha.isNotEmpty) {
       if (novaSenha.length < 6) {
-        _mensagem("A nova senha precisa ter pelo menos 6 caracteres.", Colors.red);
+        _mensagem(
+          "A nova senha precisa ter pelo menos 6 caracteres.",
+          Colors.red,
+        );
         return;
       }
 
@@ -110,7 +115,7 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
 
       final mensagem = erro.code == "requires-recent-login"
           ? "Para trocar a senha, saia e entre novamente antes de salvar."
-          : "Não foi possível atualizar: ${erro.code}";
+          : "Não foi possível salvar agora. Verifique sua internet e tente novamente.";
       _mensagem(mensagem, Colors.red);
     } catch (_) {
       if (!mounted) return;
@@ -181,9 +186,9 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
   }
 
   void _mensagem(String texto, Color cor) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(texto), backgroundColor: cor),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(texto), backgroundColor: cor));
   }
 
   @override
@@ -204,7 +209,7 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
                 _perfilResumo(colorScheme),
                 const SizedBox(height: 20),
                 _painel(
-                  title: "Dados da conta",
+                  title: "Conta",
                   children: [
                     _campo(
                       label: "Nome",
@@ -377,7 +382,7 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
         final carregando = snapshot.connectionState == ConnectionState.waiting;
 
         return _painel(
-          title: "Área do prestador",
+          title: "Perfil profissional",
           children: [
             _atalhoProfissional(
               icon: Icons.handyman,
@@ -460,7 +465,10 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
@@ -485,10 +493,7 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
     );
   }
 
-  Widget _painel({
-    required String title,
-    required List<Widget> children,
-  }) {
+  Widget _painel({required String title, required List<Widget> children}) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -524,10 +529,7 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
       controller: controller,
       readOnly: readOnly,
       keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-      ),
+      decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon)),
     );
   }
 
@@ -579,6 +581,3 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
     );
   }
 }
-
-
-

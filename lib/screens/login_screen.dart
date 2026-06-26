@@ -1,4 +1,4 @@
-﻿import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
@@ -137,7 +137,10 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await AuthService.enviarRecuperacaoSenha(email);
       if (!mounted) return;
-      _mensagem("Enviamos um link de recuperacao para seu e-mail.", Colors.green);
+      _mensagem(
+        "Enviamos um link de recuperacao para seu e-mail.",
+        Colors.green,
+      );
     } on FirebaseAuthException catch (erro) {
       if (!mounted) return;
       _mensagem(_mensagemErroAuth(erro), Colors.red);
@@ -163,14 +166,14 @@ class _LoginScreenState extends State<LoginScreen> {
       case "user-disabled":
         return "Essa conta foi desativada.";
       default:
-        return "Erro no login: ${erro.code}";
+        return "Não foi possível entrar. Verifique seus dados e tente novamente.";
     }
   }
 
   void _mensagem(String texto, Color cor) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(texto), backgroundColor: cor),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(texto), backgroundColor: cor));
   }
 
   @override
@@ -178,32 +181,50 @@ class _LoginScreenState extends State<LoginScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Entrar")),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
-              Image.asset("assets/imagens/logo.png", height: 92),
-              const SizedBox(height: 28),
-              Text(
-                "Bem-vindo ao IJob",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+              Container(
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  borderRadius: BorderRadius.circular(26),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 82,
+                      height: 82,
+                      padding: const EdgeInsets.all(10),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Image.asset("assets/imagens/logo.png"),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Entrar no IJob",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      "Acesse como cliente ou prestador usando seu e-mail cadastrado.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white70, height: 1.35),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                "Acesse sua conta para gerenciar serviços, agenda e mensagens.",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 18),
               _painelLogin(),
             ],
           ),
@@ -262,8 +283,9 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: 8),
           ElevatedButton.icon(
-            onPressed:
-                carregandoCliente || carregandoPrestador ? null : entrarCliente,
+            onPressed: carregandoCliente || carregandoPrestador
+                ? null
+                : entrarCliente,
             icon: carregandoCliente
                 ? const SizedBox(
                     width: 18,
@@ -271,7 +293,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.person),
-            label: Text(carregandoCliente ? "Entrando..." : "Entrar como cliente"),
+            label: Text(
+              carregandoCliente ? "Entrando..." : "Entrar como cliente",
+            ),
           ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
@@ -291,11 +315,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   : "Entrar como prestador",
             ),
           ),
+          const SizedBox(height: 12),
+          Text(
+            "Cliente agenda serviços. Prestador gerencia solicitações e agenda.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: colorScheme.onSurfaceVariant,
+              fontSize: 12,
+              height: 1.35,
+            ),
+          ),
         ],
       ),
     );
   }
 }
-
-
-

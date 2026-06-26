@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -72,22 +72,26 @@ class _PainelPrestadorScreenState extends State<PainelPrestadorScreen> {
     List<Agendamento> solicitacoes,
   ) {
     final pendentes = solicitacoes.where((item) => item.pendente).length;
-    final aceitos =
-        solicitacoes.where((item) => item.aceito || item.emAtendimento).length;
-    final concluidos = solicitacoes.where((item) => item.concluido).length;
-    final proximos = solicitacoes
-        .where((item) => item.pendente || item.aceito || item.emAtendimento)
-        .toList()
+    final listaPendentes = solicitacoes.where((item) => item.pendente).toList()
       ..sort(_compararAgendamento);
-    final proximosResumo = proximos
-        .take(3)
-        .toList();
+    final aceitos = solicitacoes
+        .where((item) => item.aceito || item.emAtendimento)
+        .length;
+    final concluidos = solicitacoes.where((item) => item.concluido).length;
+    final proximos =
+        solicitacoes
+            .where((item) => item.pendente || item.aceito || item.emAtendimento)
+            .toList()
+          ..sort(_compararAgendamento);
+    final proximosResumo = proximos.take(3).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 28),
       child: Column(
         children: [
           _hero(nome, prestador),
+          const SizedBox(height: 18),
+          _solicitacoesPendentes(listaPendentes),
           const SizedBox(height: 18),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -148,9 +152,8 @@ class _PainelPrestadorScreenState extends State<PainelPrestadorScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => PerfilPrestadorScreen(
-                          prestador: prestador,
-                        ),
+                        builder: (_) =>
+                            PerfilPrestadorScreen(prestador: prestador),
                       ),
                     );
                   },
@@ -178,9 +181,8 @@ class _PainelPrestadorScreenState extends State<PainelPrestadorScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => EditarPrestadorScreen(
-                          prestador: prestador,
-                        ),
+                        builder: (_) =>
+                            EditarPrestadorScreen(prestador: prestador),
                       ),
                     );
                   },
@@ -209,6 +211,100 @@ class _PainelPrestadorScreenState extends State<PainelPrestadorScreen> {
     );
   }
 
+  Widget _solicitacoesPendentes(List<Agendamento> pendentes) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 18),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: pendentes.isEmpty
+            ? colorScheme.surface
+            : Colors.orange.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: pendentes.isEmpty
+              ? colorScheme.outlineVariant.withOpacity(0.35)
+              : Colors.orange.withOpacity(0.30),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                pendentes.isEmpty
+                    ? Icons.assignment_turned_in
+                    : Icons.priority_high,
+                color: pendentes.isEmpty ? colorScheme.primary : Colors.orange,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  pendentes.isEmpty
+                      ? "Nenhuma solicitação pendente"
+                      : "${pendentes.length} solicitação(ões) aguardando resposta",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (pendentes.isEmpty)
+            Text(
+              "Quando um cliente pedir um serviço, ele aparece aqui primeiro.",
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
+            )
+          else ...[
+            ...pendentes
+                .take(2)
+                .map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "${item.nomeCliente} • ${item.servico}",
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        Text(
+                          item.horario.isEmpty ? item.data : item.horario,
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SolicitacoesPrestadorScreen(),
+                    ),
+                  ).then((_) => setState(() {}));
+                },
+                icon: const Icon(Icons.assignment),
+                label: const Text("Responder solicitações"),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _hero(String nome, Prestador? prestador) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -217,9 +313,7 @@ class _PainelPrestadorScreenState extends State<PainelPrestadorScreen> {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: colorScheme.primary,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(24),
-        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
       ),
       child: Column(
         children: [
@@ -357,10 +451,10 @@ class _PainelPrestadorScreenState extends State<PainelPrestadorScreen> {
     final statusColor = item.pendente
         ? Colors.orange
         : item.aceito
-            ? Colors.green
-            : item.emAtendimento
-                ? Colors.deepPurple
-            : colorScheme.primary;
+        ? Colors.green
+        : item.emAtendimento
+        ? Colors.deepPurple
+        : colorScheme.primary;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -489,9 +583,7 @@ class _PainelPrestadorScreenState extends State<PainelPrestadorScreen> {
   }
 
   void _mensagem(String texto) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(texto)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(texto)));
   }
 }
 
@@ -603,6 +695,3 @@ class _OpcaoPainel extends StatelessWidget {
     );
   }
 }
-
-
-

@@ -1,7 +1,6 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -49,7 +48,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
   final List<String> frasesSelecionadas = [
     "Atendimento com compromisso",
     "Orçamento claro antes do serviço",
-    "Servico feito com capricho",
+    "Serviço feito com capricho",
   ];
   String? fraseProntaSelecionada;
   final List<String> diasAtendimento = [
@@ -102,10 +101,10 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
   final List<String> frasesDisponiveis = [
     "Atendimento com compromisso",
     "Orçamento claro antes do serviço",
-    "Servico feito com capricho",
+    "Serviço feito com capricho",
     "Pontualidade no atendimento",
-    "Material e execucao de qualidade",
-    "Experiencia com clientes residenciais",
+    "Material e execução de qualidade",
+    "Experiência com clientes residenciais",
     "Disponível para chamados próximos",
     "Organização e limpeza após o serviço",
   ];
@@ -172,7 +171,10 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
       });
     } catch (_) {
       if (!mounted) return;
-      _mostrarMensagem("Não foi possível abrir a câmera ou galeria.", Colors.red);
+      _mostrarMensagem(
+        "Não foi possível abrir a câmera ou galeria.",
+        Colors.red,
+      );
     }
   }
 
@@ -347,12 +349,9 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
   }
 
   void _mostrarMensagem(String mensagem, Color cor) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: cor,
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(mensagem), backgroundColor: cor));
   }
 
   Future<void> _entrarOuCriarContaPrestador({
@@ -373,17 +372,17 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
         rethrow;
       }
 
-      await AuthService.entrarCliente(
-        emailUser: email,
-        senha: senha,
-      );
+      await AuthService.entrarCliente(emailUser: email, senha: senha);
       AuthService.loginPrestador(nome, email, cidade);
     }
   }
 
   Future<void> cadastrarPrestador() async {
     if (!_camposValidos()) {
-      _mostrarMensagem("Preencha todos os campos antes de cadastrar.", Colors.red);
+      _mostrarMensagem(
+        "Preencha todos os campos antes de cadastrar.",
+        Colors.red,
+      );
       return;
     }
 
@@ -478,9 +477,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
     } on FirebaseException catch (erro) {
       if (!mounted) return;
 
-      debugPrint(
-        "Erro ao salvar prestador no Firestore: ${erro.code} - ${erro.message}",
-      );
+      debugPrint("Falha ao salvar prestador: ${erro.code}");
       AuthService.logout();
 
       setState(() {
@@ -488,8 +485,8 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
       });
 
       final mensagem = erro.code == "permission-denied"
-          ? "O banco bloqueou o salvamento. Confira as regras do Firestore."
-          : "O banco recusou o cadastro agora. Tente novamente em instantes.";
+          ? "Não foi possível salvar agora. Verifique se o banco está liberado e tente novamente."
+          : "Não foi possível salvar agora. Verifique sua internet e tente novamente.";
       _mostrarMensagem(mensagem, Colors.red);
       return;
     } catch (_) {
@@ -501,7 +498,10 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
         salvando = false;
       });
 
-      _mostrarMensagem("Não foi possível salvar no banco agora.", Colors.red);
+      _mostrarMensagem(
+        "Não foi possível salvar agora. Verifique sua internet e tente novamente.",
+        Colors.red,
+      );
       return;
     }
 
@@ -537,10 +537,9 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
     if (texto.toLowerCase().contains("combinar")) return "A combinar";
     if (texto.startsWith("R\$")) return texto;
 
-    final somenteNumero = texto.replaceAll(",", ".").replaceAll(
-          RegExp(r"[^0-9.]"),
-          "",
-        );
+    final somenteNumero = texto
+        .replaceAll(",", ".")
+        .replaceAll(RegExp(r"[^0-9.]"), "");
     final numero = double.tryParse(somenteNumero);
 
     if (numero == null) return texto;
@@ -553,17 +552,17 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
       case "email-already-in-use":
       case "wrong-password":
       case "invalid-credential":
-        return "Esse e-mail ja existe. Use a senha correta desse cadastro ou entre como prestador.";
+        return "Esse e-mail já existe. Use a senha correta desse cadastro ou entre como prestador.";
       case "invalid-email":
-        return "Digite um e-mail valido.";
+        return "Digite um e-mail válido.";
       case "weak-password":
         return "A senha precisa ter pelo menos 6 caracteres.";
       case "network-request-failed":
-        return "Sem conexao com a internet para salvar o cadastro.";
+        return "Sem conexão com a internet para salvar o cadastro.";
       case "too-many-requests":
         return "Muitas tentativas. Aguarde um pouco e tente novamente.";
       default:
-        return "Não foi possível autenticar: ${erro.code}";
+        return "Não foi possível confirmar seus dados. Verifique as informações e tente novamente.";
     }
   }
 
@@ -572,9 +571,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Seja um prestador"),
-      ),
+      appBar: AppBar(title: const Text("Seja um prestador")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -623,9 +620,17 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
             const SizedBox(height: 14),
             _dropdownCategoria(),
             const SizedBox(height: 14),
-            _campo("Preço médio Ex: R\$ 80", Icons.attach_money, precoController),
+            _campo(
+              "Preço médio Ex: R\$ 80",
+              Icons.attach_money,
+              precoController,
+            ),
             const SizedBox(height: 14),
-            _campo("Tempo de experiência", Icons.timeline, experienciaController),
+            _campo(
+              "Tempo de experiência",
+              Icons.timeline,
+              experienciaController,
+            ),
             const SizedBox(height: 14),
             _campoDescricao(),
             const SizedBox(height: 18),
@@ -670,11 +675,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
           CircleAvatar(
             radius: 36,
             backgroundColor: Colors.white,
-            child: Icon(
-              Icons.work,
-              size: 38,
-              color: Color(0xFF1E6FD9),
-            ),
+            child: Icon(Icons.work, size: 38, color: Color(0xFF1E6FD9)),
           ),
           SizedBox(height: 14),
           Text(
@@ -710,8 +711,9 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
           CircleAvatar(
             radius: 48,
             backgroundColor: colorScheme.primary.withOpacity(0.12),
-            backgroundImage:
-                fotoPath.isEmpty ? null : FileImage(File(fotoPath)),
+            backgroundImage: fotoPath.isEmpty
+                ? null
+                : FileImage(File(fotoPath)),
             child: fotoPath.isEmpty
                 ? Icon(Icons.person, size: 48, color: colorScheme.primary)
                 : null,
@@ -760,10 +762,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
         prefixIcon: Icon(Icons.category),
       ),
       items: categorias.map((c) {
-        return DropdownMenuItem(
-          value: c,
-          child: Text(c),
-        );
+        return DropdownMenuItem(value: c, child: Text(c));
       }).toList(),
       onChanged: (value) {
         setState(() {
@@ -907,10 +906,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
           const SizedBox(height: 4),
           Text(
             "Essas frases aparecem no perfil público do prestador.",
-            style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
           ),
         ],
       ),
@@ -1087,7 +1083,8 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
 
   Widget _statusEndereco() {
     final colorScheme = Theme.of(context).colorScheme;
-    final confirmado = latitudeSelecionada != null && longitudeSelecionada != null;
+    final confirmado =
+        latitudeSelecionada != null && longitudeSelecionada != null;
 
     return Container(
       width: double.infinity,
@@ -1236,29 +1233,16 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
         padding: const EdgeInsets.only(bottom: 10),
         child: Text(
           titulo,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 17,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
         ),
       ),
     );
   }
 
-  Widget _campo(
-    String label,
-    IconData icon,
-    TextEditingController controller,
-  ) {
+  Widget _campo(String label, IconData icon, TextEditingController controller) {
     return TextField(
       controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-      ),
+      decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon)),
     );
   }
 }
-
-
-

@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -14,17 +14,13 @@ import '../services/chat_service.dart';
 import '../services/favorito_service.dart';
 import '../services/location_service.dart';
 import 'agendamento_screen.dart';
-import 'avaliacao_screen.dart';
 import 'chat_screen.dart';
 import 'login_screen.dart';
 
 class PerfilPrestadorScreen extends StatefulWidget {
   final Prestador prestador;
 
-  const PerfilPrestadorScreen({
-    super.key,
-    required this.prestador,
-  });
+  const PerfilPrestadorScreen({super.key, required this.prestador});
 
   @override
   State<PerfilPrestadorScreen> createState() => _PerfilPrestadorScreenState();
@@ -143,9 +139,7 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
       ),
     );
 
-    await controller.animateCamera(
-      CameraUpdate.newLatLngBounds(bounds, 64),
-    );
+    await controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 64));
   }
 
   @override
@@ -202,6 +196,7 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
   Widget _hero(Prestador prestador) {
     final colorScheme = Theme.of(context).colorScheme;
     final disponivel = prestador.disponivel;
+    final distancia = distanciaAtePrestadorKm;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -254,6 +249,11 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
               _pill(Icons.category, prestador.categoria),
               if (prestador.idade > 0)
                 _pill(Icons.cake, "${prestador.idade} anos"),
+              if (distancia != null)
+                _pill(
+                  Icons.near_me,
+                  "${LocationService.formatarDistancia(distancia)} de você",
+                ),
               _pill(
                 Icons.star,
                 atendimentosConcluidos == 0
@@ -304,11 +304,17 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
   Widget _metricas(Prestador prestador) {
     return Row(
       children: [
-        Expanded(child: _infoCard(Icons.attach_money, prestador.preco, "Preço")),
+        Expanded(
+          child: _infoCard(Icons.attach_money, prestador.preco, "Preço"),
+        ),
         const SizedBox(width: 8),
-        Expanded(child: _infoCard(Icons.flash_on, prestador.resposta, "Resposta")),
+        Expanded(
+          child: _infoCard(Icons.flash_on, prestador.resposta, "Resposta"),
+        ),
         const SizedBox(width: 8),
-        Expanded(child: _infoCard(Icons.verified, prestador.servicos, "Experiência")),
+        Expanded(
+          child: _infoCard(Icons.verified, prestador.servicos, "Experiência"),
+        ),
       ],
     );
   }
@@ -411,7 +417,7 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
         ? [
             "Atendimento com compromisso",
             "Orçamento claro antes do serviço",
-            "Servico feito com capricho",
+            "Serviço feito com capricho",
           ]
         : prestador.frasesPerfil;
 
@@ -436,7 +442,9 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
         "Fotos dos serviços",
         Text(
           "Este prestador ainda não adicionou fotos de serviços realizados.",
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       );
     }
@@ -500,8 +508,8 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
             children: prestador.horariosAtendimento.isEmpty
                 ? [const Chip(label: Text("Sem horários cadastrados"))]
                 : prestador.horariosAtendimento
-                    .map((horario) => Chip(label: Text(horario)))
-                    .toList(),
+                      .map((horario) => Chip(label: Text(horario)))
+                      .toList(),
           ),
         ],
       ),
@@ -528,7 +536,9 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
         Marker(
           markerId: const MarkerId("minha-localizacao"),
           position: meuPoint,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
           infoWindow: const InfoWindow(title: "Você"),
         ),
     };
@@ -553,8 +563,9 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                     markers: markers,
                     circles: {
                       Circle(
-                        circleId:
-                            CircleId("raio-${prestador.id ?? prestador.nome}"),
+                        circleId: CircleId(
+                          "raio-${prestador.id ?? prestador.nome}",
+                        ),
                         center: prestadorPoint,
                         radius: prestador.raioAtendimentoKm * 1000,
                         fillColor: colorScheme.primary.withOpacity(0.12),
@@ -594,11 +605,7 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.map,
-                            size: 16,
-                            color: colorScheme.primary,
-                          ),
+                          Icon(Icons.map, size: 16, color: colorScheme.primary),
                           const SizedBox(width: 5),
                           const Text(
                             "Google Maps",
@@ -635,9 +642,12 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                 ),
               ),
               TextButton(
-                onPressed:
-                    carregandoMinhaLocalizacao ? null : carregarMinhaLocalizacao,
-                child: Text(carregandoMinhaLocalizacao ? "Buscando" : "Atualizar"),
+                onPressed: carregandoMinhaLocalizacao
+                    ? null
+                    : carregarMinhaLocalizacao,
+                child: Text(
+                  carregandoMinhaLocalizacao ? "Buscando" : "Atualizar",
+                ),
               ),
             ],
           ),
@@ -683,8 +693,8 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
               distancia == null
                   ? "Área de atendimento: até ${prestador.raioAtendimentoKm.round()} km do endereço do prestador."
                   : dentro
-                      ? "Você está dentro da área de atendimento (${LocationService.formatarDistancia(distancia)})."
-                      : "Você está fora da área de atendimento. Distância: ${LocationService.formatarDistancia(distancia)}.",
+                  ? "Você está dentro da área de atendimento (${LocationService.formatarDistancia(distancia)})."
+                  : "Você está fora da área de atendimento. Distância: ${LocationService.formatarDistancia(distancia)}.",
               style: TextStyle(
                 color: dentro ? Colors.green : Colors.red,
                 fontWeight: FontWeight.w600,
@@ -881,10 +891,28 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
             width: double.infinity,
             height: 50,
             child: ElevatedButton.icon(
-              onPressed: foraDaArea ? () => Navigator.pop(context) : _agendarServico,
+              onPressed: foraDaArea
+                  ? () => Navigator.pop(context)
+                  : _agendarServico,
               icon: Icon(foraDaArea ? Icons.search : Icons.send),
               label: Text(
-                foraDaArea ? "Buscar prestadores próximos" : "Enviar solicitação",
+                foraDaArea
+                    ? "Buscar prestadores próximos"
+                    : "Enviar solicitação",
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: FilledButton.icon(
+              onPressed: _abrirWhatsApp,
+              icon: const Icon(Icons.phone),
+              label: const Text("Chamar no WhatsApp"),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF18A558),
+                foregroundColor: Colors.white,
               ),
             ),
           ),
@@ -899,22 +927,16 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
               ),
             ),
           ],
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _abrirWhatsApp,
-              icon: const Icon(Icons.phone),
-              label: const Text("Chamar no WhatsApp"),
-            ),
-          ),
         ],
       ),
     );
   }
 
   Future<void> _abrirWhatsApp() async {
-    final telefone = widget.prestador.telefone.replaceAll(RegExp(r"[^0-9]"), "");
+    final telefone = widget.prestador.telefone.replaceAll(
+      RegExp(r"[^0-9]"),
+      "",
+    );
     if (telefone.isEmpty) {
       if (!mounted) return;
 
@@ -951,10 +973,7 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
       MaterialPageRoute(
         builder: (_) => ChatScreen(
           contato: widget.prestador.nome,
-          chatId: ChatService.chatId(
-            AuthService.nome,
-            widget.prestador.nome,
-          ),
+          chatId: ChatService.chatId(AuthService.nome, widget.prestador.nome),
         ),
       ),
     );
@@ -964,7 +983,9 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
     if (!estaDentroDaArea) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Você está fora da área de atendimento deste prestador."),
+          content: Text(
+            "Você está fora da área de atendimento deste prestador.",
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -1023,42 +1044,22 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
         "Organização",
         "Limpeza pós-obra",
       ],
-      "Cuidadora": [
-        "Idosos",
-        "Acompanhamento",
-        "Cuidados diários",
-        "Plantões",
-      ],
+      "Cuidadora": ["Idosos", "Acompanhamento", "Cuidados diários", "Plantões"],
       "Babá": [
         "Cuidado infantil",
         "Acompanhamento escolar",
         "Horário noturno",
         "Recreação",
       ],
-      "Cozinha": [
-        "Comida caseira",
-        "Marmitas",
-        "Eventos",
-        "Confeitaria",
-      ],
-      "Hidráulica": [
-        "Vazamentos",
-        "Encanamento",
-        "Torneiras",
-        "Manutenção",
-      ],
+      "Cozinha": ["Comida caseira", "Marmitas", "Eventos", "Confeitaria"],
+      "Hidráulica": ["Vazamentos", "Encanamento", "Torneiras", "Manutenção"],
       "Pintura": [
         "Pintura interna",
         "Pintura externa",
         "Acabamento",
         "Textura",
       ],
-      "Frete": [
-        "Mudanças",
-        "Entregas",
-        "Transporte",
-        "Carretos",
-      ],
+      "Frete": ["Mudanças", "Entregas", "Transporte", "Carretos"],
       "Jardinagem": [
         "Corte de grama",
         "Poda",
@@ -1071,24 +1072,9 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
         "Sobrancelha",
         "Atendimento domiciliar",
       ],
-      "Manicure": [
-        "Mão",
-        "Pé",
-        "Alongamento",
-        "Esmaltação",
-      ],
-      "Pet care": [
-        "Passeio",
-        "Banho",
-        "Pet sitter",
-        "Cuidados em casa",
-      ],
-      "Informática": [
-        "Formatação",
-        "Instalação",
-        "Suporte técnico",
-        "Redes",
-      ],
+      "Manicure": ["Mão", "Pé", "Alongamento", "Esmaltação"],
+      "Pet care": ["Passeio", "Banho", "Pet sitter", "Cuidados em casa"],
+      "Informática": ["Formatação", "Instalação", "Suporte técnico", "Redes"],
       "Aulas particulares": [
         "Reforço escolar",
         "Idiomas",
@@ -1133,7 +1119,3 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
     return endereco;
   }
 }
-
-
-
-

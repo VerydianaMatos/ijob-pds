@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import '../services/notificacao_service.dart';
@@ -64,7 +64,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
         salvando = false;
       });
       _mensagem(
-        "Não foi possível criar a conta. Verifique o e-mail e a senha.",
+        "Não foi possível criar a conta agora. Verifique sua internet e tente novamente.",
         Colors.red,
       );
       return;
@@ -81,9 +81,9 @@ class _CadastroScreenState extends State<CadastroScreen> {
   }
 
   void _mensagem(String texto, Color cor) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(texto), backgroundColor: cor),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(texto), backgroundColor: cor));
   }
 
   @override
@@ -91,10 +91,9 @@ class _CadastroScreenState extends State<CadastroScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Criar conta")),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -102,7 +101,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
                   color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(26),
                 ),
                 child: const Column(
                   children: [
@@ -134,28 +133,44 @@ class _CadastroScreenState extends State<CadastroScreen> {
                 ),
               ),
               const SizedBox(height: 22),
-              _campo("Nome completo", Icons.person, nomeController),
-              const SizedBox(height: 12),
-              _campo("Email", Icons.email, emailController),
-              const SizedBox(height: 12),
-              _campo("Telefone", Icons.phone, telefoneController),
-              const SizedBox(height: 12),
-              TextField(
-                controller: senhaController,
-                obscureText: ocultarSenha,
-                decoration: InputDecoration(
-                  labelText: "Senha",
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        ocultarSenha = !ocultarSenha;
-                      });
-                    },
-                    icon: Icon(
-                      ocultarSenha ? Icons.visibility : Icons.visibility_off,
-                    ),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant.withOpacity(0.35),
                   ),
+                ),
+                child: Column(
+                  children: [
+                    _campo("Nome completo", Icons.person, nomeController),
+                    const SizedBox(height: 12),
+                    _campo("Email", Icons.email, emailController),
+                    const SizedBox(height: 12),
+                    _campo("Telefone", Icons.phone, telefoneController),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: senhaController,
+                      obscureText: ocultarSenha,
+                      decoration: InputDecoration(
+                        labelText: "Senha",
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              ocultarSenha = !ocultarSenha;
+                            });
+                          },
+                          icon: Icon(
+                            ocultarSenha
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 22),
@@ -168,7 +183,9 @@ class _CadastroScreenState extends State<CadastroScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.check),
-                label: Text(salvando ? "Criando conta..." : "Cadastrar cliente"),
+                label: Text(
+                  salvando ? "Criando conta..." : "Cadastrar cliente",
+                ),
               ),
             ],
           ),
@@ -177,20 +194,10 @@ class _CadastroScreenState extends State<CadastroScreen> {
     );
   }
 
-  Widget _campo(
-    String label,
-    IconData icon,
-    TextEditingController controller,
-  ) {
+  Widget _campo(String label, IconData icon, TextEditingController controller) {
     return TextField(
       controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-      ),
+      decoration: InputDecoration(labelText: label, prefixIcon: Icon(icon)),
     );
   }
 }
-
-
-

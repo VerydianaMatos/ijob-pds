@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import '../models/agendamento_model.dart';
 import '../services/agendamento_service.dart';
@@ -32,8 +32,8 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
           final lista = snapshot.hasData
               ? snapshot.data!
               : nomeCliente.isEmpty
-                  ? AgendamentoService.agendamentos
-                  : AgendamentoService.porCliente(nomeCliente);
+              ? AgendamentoService.agendamentos
+              : AgendamentoService.porCliente(nomeCliente);
 
           return _conteudo(lista);
         },
@@ -43,8 +43,9 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
 
   Widget _conteudo(List<Agendamento> lista) {
     final colorScheme = Theme.of(context).colorScheme;
-    final atualizados =
-        lista.where((item) => item.aceito || item.recusado).length;
+    final atualizados = lista
+        .where((item) => item.aceito || item.recusado)
+        .length;
     final filtrados = lista.where((item) {
       if (abaSelecionada == "Ativos") {
         return item.pendente || item.aceito || item.emAtendimento;
@@ -158,7 +159,9 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.4)),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withOpacity(0.4),
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -168,139 +171,154 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
           ],
         ),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: colorScheme.primary.withOpacity(0.12),
-                child: Icon(Icons.handyman, color: colorScheme.primary),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: colorScheme.primary.withOpacity(0.12),
+                  child: Icon(Icons.handyman, color: colorScheme.primary),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.nomePrestador,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        item.servico,
+                        style: TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _status(item.status),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_month,
+                  size: 18,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    item.data,
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _mensagemStatus(item),
+              style: TextStyle(
+                color: _statusColor(item.status),
+                fontWeight: FontWeight.w700,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
+            ),
+            if (item.justificativaPrestador.trim().isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _statusColor(item.status).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.nomePrestador,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    Icon(
+                      Icons.notes,
+                      size: 18,
+                      color: _statusColor(item.status),
                     ),
-                    Text(
-                      item.servico,
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 13,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.recusado
+                                ? "Justificativa da recusa"
+                                : "Mensagem do prestador",
+                            style: TextStyle(
+                              color: _statusColor(item.status),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            item.justificativaPrestador,
+                            style: TextStyle(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              _status(item.status),
             ],
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_month,
-                size: 18,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  item.data,
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            _mensagemStatus(item),
-            style: TextStyle(
-              color: _statusColor(item.status),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          if (item.justificativaPrestador.trim().isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: _statusColor(item.status).withOpacity(0.08),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.notes,
-                    size: 18,
-                    color: _statusColor(item.status),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: item.recusado
+                        ? null
+                        : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChatScreen(
+                                  contato: item.nomePrestador,
+                                  chatId: ChatService.chatId(
+                                    item.nomeCliente,
+                                    item.nomePrestador,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                    icon: const Icon(Icons.chat),
+                    label: const Text("Chat"),
                   ),
-                  const SizedBox(width: 8),
+                ),
+                if (item.concluido) ...[
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
-                      item.justificativaPrestador,
-                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AvaliacaoScreen(agendamento: item),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.star),
+                      label: const Text("Avaliar"),
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
           ],
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: item.recusado
-                      ? null
-                      : () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ChatScreen(
-                                contato: item.nomePrestador,
-                                chatId: ChatService.chatId(
-                                  item.nomeCliente,
-                                  item.nomePrestador,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                  icon: const Icon(Icons.chat),
-                  label: const Text("Chat"),
-                ),
-              ),
-              if (item.concluido) ...[
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AvaliacaoScreen(
-                            agendamento: item,
-                          ),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.star),
-                    label: const Text("Avaliar"),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ],
         ),
       ),
     );
@@ -337,15 +355,37 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
         color: _statusColor(status).withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        _statusTexto(status),
-        style: TextStyle(
-          color: _statusColor(status),
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(_statusIcon(status), size: 14, color: _statusColor(status)),
+          const SizedBox(width: 4),
+          Text(
+            _statusTexto(status),
+            style: TextStyle(
+              color: _statusColor(status),
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  IconData _statusIcon(StatusAgendamento status) {
+    switch (status) {
+      case StatusAgendamento.pendente:
+        return Icons.schedule;
+      case StatusAgendamento.aceito:
+        return Icons.check_circle;
+      case StatusAgendamento.emAtendimento:
+        return Icons.handyman;
+      case StatusAgendamento.recusado:
+        return Icons.cancel;
+      case StatusAgendamento.concluido:
+        return Icons.done_all;
+    }
   }
 
   String _statusTexto(StatusAgendamento status) {
@@ -378,6 +418,3 @@ class _MeusServicosScreenState extends State<MeusServicosScreen> {
     }
   }
 }
-
-
-
