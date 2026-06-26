@@ -8,7 +8,6 @@ import '../services/location_service.dart';
 import '../services/prestador_service.dart';
 import '../theme/theme_controller.dart';
 import 'editar_prestador_screen.dart';
-import 'informacoes_app_screen.dart';
 import 'solicitacoes_prestador_screen.dart';
 
 class ConfiguracoesScreen extends StatefulWidget {
@@ -301,39 +300,6 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                _painel(
-                  title: "App e apresentação",
-                  children: [
-                    _atalhoInfo(
-                      icon: Icons.info,
-                      title: "Sobre o IJob",
-                      subtitle: "Objetivo, problema resolvido e tecnologias",
-                      tipo: TipoInformacaoApp.sobre,
-                    ),
-                    const SizedBox(height: 10),
-                    _atalhoInfo(
-                      icon: Icons.help,
-                      title: "Ajuda",
-                      subtitle: "Como usar agendamentos, localização e conta",
-                      tipo: TipoInformacaoApp.ajuda,
-                    ),
-                    const SizedBox(height: 10),
-                    _atalhoInfo(
-                      icon: Icons.privacy_tip,
-                      title: "Privacidade",
-                      subtitle: "Uso de localização, telefone e fotos",
-                      tipo: TipoInformacaoApp.privacidade,
-                    ),
-                    const SizedBox(height: 10),
-                    _atalhoInfo(
-                      icon: Icons.fact_check,
-                      title: "Checklist da banca",
-                      subtitle: "Roteiro rápido para testar antes de apresentar",
-                      tipo: TipoInformacaoApp.checklist,
-                    ),
-                  ],
-                ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -513,59 +479,6 @@ class _ConfiguracoesScreenState extends State<ConfiguracoesScreen> {
               )
             else
               Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _atalhoInfo({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required TipoInformacaoApp tipo,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => InformacoesAppScreen(tipo: tipo),
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: colorScheme.primary.withOpacity(0.12),
-              child: Icon(icon, color: colorScheme.primary),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 3),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: colorScheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant),
           ],
         ),
       ),
