@@ -844,6 +844,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
           ),
           const SizedBox(height: 14),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             value: fraseProntaSelecionada,
             decoration: const InputDecoration(
               labelText: "Escolher frase pronta",
@@ -858,9 +859,11 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
             onChanged: adicionarFrasePronta,
           ),
           const SizedBox(height: 12),
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Expanded(
+              SizedBox(
+                width: double.infinity,
                 child: TextField(
                   controller: fraseController,
                   textCapitalization: TextCapitalization.sentences,
@@ -870,7 +873,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(height: 10),
               IconButton.filled(
                 onPressed: adicionarFraseDigitada,
                 icon: const Icon(Icons.add),
