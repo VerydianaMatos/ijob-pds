@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../services/notificacao_service.dart';
 import '../services/prestador_service.dart';
 import 'home_screen.dart';
+import 'painel_prestador_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,8 +43,29 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await AuthService.entrarCliente(emailUser: email, senha: senha);
       await _salvarTokenSemBloquearLogin();
+      final prestador = await PrestadorService.buscarPrestadorPorEmail(email);
 
       if (!mounted) return;
+
+      if (prestador != null) {
+        final continuarCliente = await _confirmarLoginComoCliente();
+
+        if (!mounted) return;
+
+        if (continuarCliente == false) {
+          AuthService.loginPrestador(
+            prestador.nome,
+            prestador.email.isEmpty ? email : prestador.email,
+            prestador.endereco,
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const PainelPrestadorScreen()),
+          );
+          return;
+        }
+      }
 
       Navigator.pushReplacement(
         context,
@@ -126,6 +148,30 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<bool?> _confirmarLoginComoCliente() async {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Você entrou como cliente"),
+          content: const Text(
+            "Este e-mail também possui cadastro de prestador. Para ver solicitações, agenda e mensagens de clientes, entre no painel do prestador.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Continuar como cliente"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Ir para prestador"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> recuperarSenha() async {
     final email = emailController.text.trim().toLowerCase();
 
@@ -138,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
       await AuthService.enviarRecuperacaoSenha(email);
       if (!mounted) return;
       _mensagem(
-        "Enviamos um link de recuperacao para seu e-mail.",
+        "Enviamos um link de recuperação para seu e-mail.",
         Colors.green,
       );
     } on FirebaseAuthException catch (erro) {
@@ -181,44 +227,49 @@ class _LoginScreenState extends State<LoginScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFEFF2F6),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(26),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 48,
                 ),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Image.asset("assets/imagens/logo.png", height: 74),
-                    const SizedBox(height: 16),
-                    const Text(
+                    Center(
+                      child: Image.asset("assets/imagens/logo.png", height: 82),
+                    ),
+                    const SizedBox(height: 22),
+                    Text(
                       "Entrar no IJob",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
+                        color: colorScheme.onSurface,
+                        fontSize: 26,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      "Acesse como cliente ou prestador usando seu e-mail cadastrado.",
+                    Text(
+                      "Acesse como cliente ou prestador",
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70, height: 1.35),
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.35,
+                      ),
                     ),
+                    const SizedBox(height: 26),
+                    _painelLogin(),
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
-              _painelLogin(),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -231,8 +282,15 @@ class _LoginScreenState extends State<LoginScreen> {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

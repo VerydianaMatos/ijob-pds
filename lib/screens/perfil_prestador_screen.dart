@@ -559,6 +559,7 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                       target: prestadorPoint,
                       zoom: 14,
                     ),
+                    onTap: (_) => _abrirMapaExpandido(prestador),
                     mapType: MapType.normal,
                     markers: markers,
                     circles: {
@@ -615,6 +616,23 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                       ),
                     ),
                   ),
+                  Positioned(
+                    right: 12,
+                    top: 12,
+                    child: Material(
+                      color: colorScheme.surface.withOpacity(0.94),
+                      borderRadius: BorderRadius.circular(999),
+                      elevation: 3,
+                      child: IconButton(
+                        tooltip: "Expandir mapa",
+                        onPressed: () => _abrirMapaExpandido(prestador),
+                        icon: Icon(
+                          Icons.fullscreen,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -652,6 +670,18 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  void _abrirMapaExpandido(Prestador prestador) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => _MapaExpandidoScreen(
+          prestador: prestador,
+          minhaLocalizacao: minhaLocalizacao,
+        ),
       ),
     );
   }
@@ -1117,5 +1147,136 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
     }
 
     return endereco;
+  }
+}
+
+class _MapaExpandidoScreen extends StatelessWidget {
+  final Prestador prestador;
+  final LocalizacaoAtual? minhaLocalizacao;
+
+  const _MapaExpandidoScreen({
+    required this.prestador,
+    required this.minhaLocalizacao,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final prestadorPoint = LatLng(prestador.latitude, prestador.longitude);
+    final meuPoint = minhaLocalizacao == null
+        ? null
+        : LatLng(minhaLocalizacao!.latitude, minhaLocalizacao!.longitude);
+
+    final markers = <Marker>{
+      Marker(
+        markerId: MarkerId(prestador.id ?? prestador.nome),
+        position: prestadorPoint,
+        infoWindow: InfoWindow(title: prestador.nome, snippet: "Prestador"),
+      ),
+      if (meuPoint != null)
+        Marker(
+          markerId: const MarkerId("cliente"),
+          position: meuPoint,
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
+          infoWindow: const InfoWindow(title: "Você"),
+        ),
+    };
+
+    return Scaffold(
+      appBar: AppBar(title: const Text("Mapa do atendimento")),
+      body: Stack(
+        children: [
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: prestadorPoint,
+              zoom: 14,
+            ),
+            markers: markers,
+            circles: {
+              Circle(
+                circleId: CircleId("raio-${prestador.id ?? prestador.nome}"),
+                center: prestadorPoint,
+                radius: prestador.raioAtendimentoKm * 1000,
+                fillColor: colorScheme.primary.withOpacity(0.12),
+                strokeColor: colorScheme.primary.withOpacity(0.55),
+                strokeWidth: 2,
+              ),
+            },
+            myLocationEnabled: meuPoint != null,
+            myLocationButtonEnabled: meuPoint != null,
+            zoomControlsEnabled: true,
+            compassEnabled: true,
+            mapToolbarEnabled: true,
+            onMapCreated: (controller) async {
+              if (meuPoint == null) return;
+
+              final bounds = LatLngBounds(
+                southwest: LatLng(
+                  math.min(prestadorPoint.latitude, meuPoint.latitude),
+                  math.min(prestadorPoint.longitude, meuPoint.longitude),
+                ),
+                northeast: LatLng(
+                  math.max(prestadorPoint.latitude, meuPoint.latitude),
+                  math.max(prestadorPoint.longitude, meuPoint.longitude),
+                ),
+              );
+
+              await controller.animateCamera(
+                CameraUpdate.newLatLngBounds(bounds, 72),
+              );
+            },
+          ),
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 16,
+            child: SafeArea(
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: colorScheme.surface.withOpacity(0.96),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.14),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    _legendaMapa(Colors.red, "Prestador"),
+                    const SizedBox(width: 14),
+                    _legendaMapa(Colors.blue, "Você"),
+                    const Spacer(),
+                    Text(
+                      "Atende até ${prestador.raioAtendimentoKm.round()} km",
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _legendaMapa(Color color, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.location_pin, color: color, size: 18),
+        const SizedBox(width: 4),
+        Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
+      ],
+    );
   }
 }

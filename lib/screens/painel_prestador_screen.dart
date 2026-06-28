@@ -8,6 +8,7 @@ import '../services/agendamento_service.dart';
 import '../services/auth_service.dart';
 import '../services/prestador_service.dart';
 import 'chat_screen.dart';
+import 'conversas_prestador_screen.dart';
 import 'editar_prestador_screen.dart';
 import 'home_screen.dart';
 import 'perfil_prestador_screen.dart';
@@ -161,12 +162,12 @@ class _PainelPrestadorScreenState extends State<PainelPrestadorScreen> {
           _OpcaoPainel(
             icon: Icons.chat,
             titulo: "Mensagens",
-            subtitulo: "Converse com clientes",
+            subtitulo: "Escolha um cliente para conversar",
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const ChatScreen(contato: "Clientes"),
+                  builder: (_) => const ConversasPrestadorScreen(),
                 ),
               );
             },
