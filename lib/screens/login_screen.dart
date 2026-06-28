@@ -195,16 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 child: Column(
                   children: [
-                    Container(
-                      width: 82,
-                      height: 82,
-                      padding: const EdgeInsets.all(10),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Image.asset("assets/imagens/logo.png"),
-                    ),
+                    Image.asset("assets/imagens/logo.png", height: 74),
                     const SizedBox(height: 16),
                     const Text(
                       "Entrar no IJob",
