@@ -91,9 +91,17 @@ class _CadastroScreenState extends State<CadastroScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Criar conta"),
+        leading: IconButton(
+          tooltip: "Voltar",
+          onPressed: _voltar,
+          icon: const Icon(Icons.arrow_back),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 28, 20, 20),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -191,6 +199,18 @@ class _CadastroScreenState extends State<CadastroScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _voltar() {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
     );
   }
 

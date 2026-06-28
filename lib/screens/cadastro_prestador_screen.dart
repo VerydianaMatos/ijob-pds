@@ -571,7 +571,14 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Seja um prestador")),
+      appBar: AppBar(
+        title: const Text("Seja um prestador"),
+        leading: IconButton(
+          tooltip: "Voltar",
+          onPressed: _voltar,
+          icon: const Icon(Icons.arrow_back),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -659,6 +666,18 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _voltar() {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
     );
   }
 

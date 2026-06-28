@@ -224,69 +224,125 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final escuro = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
+    final fundoLogin = escuro
+        ? const Color(0xFF101827)
+        : const Color(0xFFEFF2F6);
+    final tituloLogin = escuro ? Colors.white : colorScheme.onSurface;
+    final subtituloLogin = escuro
+        ? const Color(0xFFC6D0E2)
+        : colorScheme.onSurfaceVariant;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFEFF2F6),
+      backgroundColor: fundoLogin,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - 48,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Image.asset("assets/imagens/logo.png", height: 82),
+        child: Stack(
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 48,
                     ),
-                    const SizedBox(height: 22),
-                    Text(
-                      "Entrar no IJob",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: colorScheme.onSurface,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: Image.asset(
+                            escuro
+                                ? "assets/imagens/logo_dark.png"
+                                : "assets/imagens/logo.png",
+                            height: 82,
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+                        Text(
+                          "Entrar no IJob",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: tituloLogin,
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Acesse como cliente ou prestador",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: subtituloLogin, height: 1.35),
+                        ),
+                        const SizedBox(height: 26),
+                        _painelLogin(),
+                      ],
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      "Acesse como cliente ou prestador",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: colorScheme.onSurfaceVariant,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 26),
-                    _painelLogin(),
-                  ],
-                ),
-              ),
-            );
-          },
+                  ),
+                );
+              },
+            ),
+            Positioned(left: 12, top: 8, child: _botaoVoltarLogin(escuro)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _botaoVoltarLogin(bool escuro) {
+    return Material(
+      color: escuro ? const Color(0xFF182235) : Colors.white,
+      shape: const CircleBorder(),
+      elevation: escuro ? 0 : 2,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+            return;
+          }
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
+        },
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Icon(
+            Icons.arrow_back,
+            color: escuro ? Colors.white : const Color(0xFF1F2937),
+          ),
         ),
       ),
     );
   }
 
   Widget _painelLogin() {
+    final escuro = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
+    final corPainel = escuro ? const Color(0xFF182235) : colorScheme.surface;
+    final corBorda = escuro
+        ? Colors.white.withOpacity(0.08)
+        : colorScheme.outlineVariant.withOpacity(0.35);
+    final corSombra = escuro
+        ? Colors.black.withOpacity(0.24)
+        : Colors.black.withOpacity(0.06);
+    final corTextoAuxiliar = escuro
+        ? const Color(0xFFC6D0E2)
+        : colorScheme.onSurfaceVariant;
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: corPainel,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.35)),
+        border: Border.all(color: corBorda),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: corSombra,
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -369,7 +425,7 @@ class _LoginScreenState extends State<LoginScreen> {
             "Cliente agenda serviços. Prestador gerencia solicitações e agenda.",
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: colorScheme.onSurfaceVariant,
+              color: corTextoAuxiliar,
               fontSize: 12,
               height: 1.35,
             ),
