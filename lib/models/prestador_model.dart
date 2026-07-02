@@ -1,4 +1,4 @@
-﻿class Prestador {
+class Prestador {
   final String? id;
   final String nome;
   final String email;
@@ -64,6 +64,9 @@
   });
 
   factory Prestador.fromMap(Map<String, dynamic> data, {String? id}) {
+    final totalAvaliacoes = (data["totalAvaliacoes"] ?? 0).toInt();
+    final ratingSalvo = (data["rating"] ?? 0.0).toDouble();
+
     return Prestador(
       id: id,
       nome: data["nome"] ?? "",
@@ -72,7 +75,7 @@
       profissao: data["profissao"] ?? "",
       categoria: data["categoria"] ?? "Serviço geral",
       distancia: data["distancia"] ?? "0.5 km",
-      rating: (data["rating"] ?? 5.0).toDouble(),
+      rating: totalAvaliacoes > 0 ? ratingSalvo : 0.0,
       disponivel: data["disponivel"] ?? true,
       descricao: data["descricao"] ?? "",
       preco: data["preco"] ?? "A combinar",
@@ -80,7 +83,8 @@
       servicos: data["servicos"] ?? "Novo",
       latitude: (data["latitude"] ?? -29.7604).toDouble(),
       longitude: (data["longitude"] ?? -50.0280).toDouble(),
-      endereco: data["endereco"] ?? data["localizacao"] ?? "Capão da Canoa - RS",
+      endereco:
+          data["endereco"] ?? data["localizacao"] ?? "Capão da Canoa - RS",
       fotoPath: data["fotoPath"] ?? data["fotoUrl"] ?? "",
       idade: (data["idade"] ?? 0).toInt(),
       fotosServicos: List<String>.from(data["fotosServicos"] ?? []),
@@ -121,9 +125,7 @@
       "raioAtendimentoKm": raioAtendimentoKm,
       "diasAtendimento": diasAtendimento,
       "horariosAtendimento": horariosAtendimento,
+      "totalAvaliacoes": 0,
     };
   }
 }
-
-
-

@@ -446,7 +446,7 @@ class _CadastroPrestadorScreenState extends State<CadastroPrestadorScreen> {
           profissao: profissao,
           categoria: categoriaSelecionada,
           distancia: "0.5 km",
-          rating: 5.0,
+          rating: 0.0,
           disponivel: true,
           descricao: descricao,
           preco: preco,

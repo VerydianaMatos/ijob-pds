@@ -254,11 +254,23 @@ class _PerfilPrestadorScreenState extends State<PerfilPrestadorScreen> {
                   Icons.near_me,
                   "${LocationService.formatarDistancia(distancia)} de você",
                 ),
-              _pill(
-                Icons.star,
-                atendimentosConcluidos == 0
-                    ? "Sem avaliações"
-                    : prestador.rating.toString(),
+              StreamBuilder(
+                stream: AvaliacaoService.porPrestador(prestador.nome),
+                builder: (context, snapshot) {
+                  final avaliacoes = snapshot.data ?? [];
+
+                  if (avaliacoes.isEmpty) {
+                    return _pill(Icons.star, "Sem avaliações");
+                  }
+
+                  final media =
+                      avaliacoes
+                          .map((avaliacao) => avaliacao.estrelas)
+                          .reduce((total, estrelas) => total + estrelas) /
+                      avaliacoes.length;
+
+                  return _pill(Icons.star, media.toStringAsFixed(1));
+                },
               ),
               _pill(Icons.location_on, _localizacaoCurta(prestador.endereco)),
               _pill(
